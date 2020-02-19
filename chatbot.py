@@ -184,8 +184,19 @@ class Chatbot:
         :param preprocessed_input: a user-supplied line of text that has been pre-processed with preprocess()
         :returns: a numerical value for the sentiment of the text
         """
-        return 0
-
+        input_sentiment = 0
+        for w in preprocessed_input:
+            word_sentiment = self.sentiment.get(w, '') # default to empty string
+            if word_sentiment == 'pos':
+                input_sentiment += 1
+            elif word_sentiment == 'neg':
+                input_sentiment -= 1
+        if input_sentiment == 0:
+            return 0
+        elif input_sentiment < 0:
+            return -1
+        else:
+            return 1
     def extract_sentiment_for_movies(self, preprocessed_input):
         """Creative Feature: Extracts the sentiments from a line of pre-processed text
         that may contain multiple movies. Note that the sentiments toward
