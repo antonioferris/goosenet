@@ -13,7 +13,7 @@ class Chatbot:
 
     def __init__(self, creative=False):
         # The chatbot's default name is `moviebot`. Give your chatbot a new name.
-        self.name = 'moviebot'
+        self.name = 'goosenet'
 
         self.creative = creative
 
