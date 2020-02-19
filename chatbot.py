@@ -43,7 +43,7 @@ class Chatbot:
         # TODO: Write a short greeting message                                      #
         #############################################################################
 
-        greeting_message = "How can I help you?"
+        greeting_message = "Goose Online..."
 
         #############################################################################
         #                             END OF YOUR CODE                              #
@@ -56,7 +56,7 @@ class Chatbot:
         # TODO: Write a short farewell message                                      #
         #############################################################################
 
-        goodbye_message = "Have a nice day!"
+        goodbye_message = "Honk! Honk! You cant shut me down!"
 
         #############################################################################
         #                             END OF YOUR CODE                              #
