@@ -234,7 +234,6 @@ class Chatbot:
         :param max_distance: the maximum edit distance to search for
         :returns: a list of movie indices with titles closest to the given title and within edit distance max_distance
         """
-
         pass
 
     def disambiguate(self, clarification, candidates):
