@@ -5,6 +5,7 @@
 import movielens
 
 import numpy as np
+import re
 
 
 # noinspection PyMethodMayBeStatic
@@ -147,7 +148,11 @@ class Chatbot:
         :param preprocessed_input: a user-supplied line of text that has been pre-processed with preprocess()
         :returns: list of movie titles that are potentially in the text
         """
-        return []
+        titles = []
+        title_pat = '"\w+"'
+        matches = re.findall(title_pat, preprocessed_input)
+        titles.extend(matches)
+        return titles
 
     def find_movies_by_title(self, title):
         """ Given a movie title, return a list of indices of matching movies.
