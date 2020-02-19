@@ -146,6 +146,7 @@ class Chatbot:
 
         :param preprocessed_input: a user-supplied line of text that has been pre-processed with preprocess()
         :returns: list of movie titles that are potentially in the text
+
         """
         return []
 
@@ -165,7 +166,9 @@ class Chatbot:
         :param title: a string containing a movie title
         :returns: a list of indices of matching movies
         """
-        return []
+
+        # doesnt handle year proporly, yet can do that in extract titles or here
+        return [index for index in self.titles if title in index]
 
     def extract_sentiment(self, preprocessed_input):
         """Extract a sentiment rating from a line of pre-processed text.
