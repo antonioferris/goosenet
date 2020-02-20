@@ -27,6 +27,7 @@ class Chatbot:
         #############################################################################
         # TODO: Binarize the movie ratings matrix.                                  #
         #############################################################################
+        # self.title_dict = {v : k for k, v in dict(enumerate(titles))}
 
         # Binarize the movie ratings before storing the binarized matrix.
         self.ratings = ratings
@@ -154,6 +155,29 @@ class Chatbot:
         titles.extend(matches)
         return titles
 
+    def title_match(self, title, movie):
+        # FIrst, we remove the possible year appended to either title or movie
+        year_regex = re.compile('\(([0-9]{4})\)')
+        movie_year = year_regex.findall(movie)
+        title_year = year_regex.findall(title)
+        if movie_year: # IF the movie has a specific year associated with it
+            if title_year:
+                # Year only needs to match if year provided,
+                # Otherwise search is general
+                if title_year[0] != movie_year[0]:
+                    return False
+                title = title[:-7] #remove year from end of title
+            movie = movie[:-7]
+        ARTICLES = {'A', 'AN', 'THE'}
+        for a in ARTICLES:
+            # IF either movie or title ends with a comma appended article,
+            # We move the article back to the beginning to normalize
+            if movie.endswith(', ' + a):
+                movie = a + ' ' + movie[:-len(a)-2]
+            if title.endswith(', ' + a):
+                title = a + ' ' + title[:-len(a)-2]
+        return title == movie
+
     def find_movies_by_title(self, title):
         """ Given a movie title, return a list of indices of matching movies.
 
@@ -170,7 +194,13 @@ class Chatbot:
         :param title: a string containing a movie title
         :returns: a list of indices of matching movies
         """
-        return []
+        r = []
+        for i in range(len(self.titles)):
+            movie = self.titles[i][0]
+            if self.title_match(title.upper(), movie.upper()):
+                r.append(i)
+        
+        return r
 
     def extract_sentiment(self, preprocessed_input):
         """Extract a sentiment rating from a line of pre-processed text.
@@ -189,6 +219,7 @@ class Chatbot:
         :param preprocessed_input: a user-supplied line of text that has been pre-processed with preprocess()
         :returns: a numerical value for the sentiment of the text
         """
+        preprocessed_input = preprocessed_input.lower().split()
         input_sentiment = 0
         for w in preprocessed_input:
             word_sentiment = self.sentiment.get(w, '') # default to empty string
@@ -202,6 +233,7 @@ class Chatbot:
             return -1
         else:
             return 1
+    
     def extract_sentiment_for_movies(self, preprocessed_input):
         """Creative Feature: Extracts the sentiments from a line of pre-processed text
         that may contain multiple movies. Note that the sentiments toward
@@ -287,9 +319,16 @@ class Chatbot:
         # TODO: Binarize the supplied ratings matrix. Do not use the self.ratings   #
         # matrix directly in this function.                                         #
         #############################################################################
-
-        # The starter code returns a new matrix shaped like ratings but full of zeros.
         binarized_ratings = np.zeros_like(ratings)
+        for i in range(len(ratings)):
+            for j in range(len(ratings[0])):
+                if ratings[i][j] > threshold:
+                    binarized_ratings[i, j] = 1
+                elif ratings[i][j] == 0:
+                    binarized_ratings[i, j] = 0
+                else:
+                    binarized_ratings[i, j] = -1
+        binarized_ratings = np.array(binarized_ratings)
 
         #############################################################################
         #                             END OF YOUR CODE                              #
@@ -309,7 +348,10 @@ class Chatbot:
         #############################################################################
         # TODO: Compute cosine similarity between the two vectors.
         #############################################################################
-        similarity = 0
+        dot_product = np.dot(u, v)
+        norm1 = np.linalg.norm(u)
+        norm2 = np.linalg.norm(v)
+        similarity = dot_product / (norm1 * norm2)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
