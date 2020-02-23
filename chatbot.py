@@ -220,6 +220,18 @@ class Chatbot:
         :returns: a numerical value for the sentiment of the text
         """
         preprocessed_input = preprocessed_input.lower().split()
+        NEGATION = r"""
+	    (?:
+        	^(?:never|no|nothing|nowhere|noone|none|not|
+            havent|hasnt|hadnt|cant|couldnt|shouldnt|
+            wont|wouldnt|dont|doesnt|didnt|isnt|arent|aint
+        	)$
+    	)
+    	|
+  		n't"""
+
+		NEGATION_RE = re.compile(NEGATION, re.VERBOSE)
+
         input_sentiment = 0
         for w in preprocessed_input:
             word_sentiment = self.sentiment.get(w, '') # default to empty string
@@ -227,6 +239,8 @@ class Chatbot:
                 input_sentiment += 1
             elif word_sentiment == 'neg':
                 input_sentiment -= 1
+            print("input sentiment is: " + str(input_sentiment))
+
         if input_sentiment == 0:
             return 0
         elif input_sentiment < 0:
