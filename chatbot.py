@@ -412,14 +412,15 @@ class Chatbot:
         # For starter mode, you should use item-item collaborative filtering                  #
         # with cosine similarity, no mean-centering, and no normalization of scores.          #
         #######################################################################################
-
-        # Populate this list with k movie indices to recommend to the user.
-        recommendations = []
-
-        #############################################################################
-        #                             END OF YOUR CODE                              #
-        #############################################################################
-        return recommendations
+        # Get a list of the indexes where the user rated movies
+        user_rated_movies = np.where(user_ratings != 0)[0]
+        def item_item_score(i):
+            # For each movie j the user has rating, sum the similiarty of movie j to movie i multiplied by the users rating
+            return sum([user_ratings[j] * self.similarity(ratings_matrix[i], ratings_matrix[j]) for j in user_rated_movies])
+        # Sort all the unrated movies (np.where(user_ratings == 0)[0]) by their item_item score
+        recommendations = sorted(np.where(user_ratings == 0)[0], key= lambda i : item_item_score(i), reverse = True)
+        # Return the top k movies
+        return recommendations[:k]
 
     #############################################################################
     # 4. Debug info                                                             #
