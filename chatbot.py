@@ -3,7 +3,7 @@
 # Original Python code by Ignacio Cases (@cases)
 ######################################################################
 import movielens
-
+import nltk
 import numpy as np
 import re
 
@@ -69,6 +69,20 @@ class Chatbot:
     # 2. Modules 2 and 3: extraction and transformation                           #
     ###############################################################################
 
+    def get_subjects(self, line):
+        """
+        Returns a list of subjects detected in a sentence or an empty list if none
+        """
+        
+        words = [ i[0] for i in line if 'N' in i[1]] 
+        return words
+
+
+    def question_process(self, line, tagged_tokens):
+        subjects = self.get_subjects(tagged_tokens)
+        return (" HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0]))
+
+
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
 
@@ -93,6 +107,17 @@ class Chatbot:
         # possibly calling other functions. Although modular code is not graded,    #
         # it is highly recommended.                                                 #
         #############################################################################
+        QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
+
+        list_of_words = nltk.word_tokenize(line)
+        tagged_tokens = nltk.pos_tag(list_of_words)
+        print (type(nltk.chunk.ne_chunk(tagged_tokens)))
+
+        if any(map(line.lower().startswith, QUESTION_WORDS)):
+            print (tagged_tokens)
+    
+            return self.question_process(line, tagged_tokens)
+
         if self.creative:
             response = "I processed {} in creative mode!!".format(line)
         else:
@@ -102,6 +127,7 @@ class Chatbot:
         #                             END OF YOUR CODE                              #
         #############################################################################
         return response
+   
 
     @staticmethod
     def preprocess(text):
