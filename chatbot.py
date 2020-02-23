@@ -155,12 +155,12 @@ class Chatbot:
         titles.extend(matches)
         return titles
 
-    def title_match(self, title, movie):
+    def title_match(self, title, movie, edit_distance = 0, substring_match = False):
         # FIrst, we remove the possible year appended to either title or movie
         year_regex = re.compile('\(([0-9]{4})\)')
         movie_year = year_regex.findall(movie)
         title_year = year_regex.findall(title)
-        if movie_year: # IF the movie has a specific year associated with it
+        if movie_year: # If the movie has a specific year associated with it
             if title_year:
                 # Year only needs to match if year provided,
                 # Otherwise search is general
@@ -176,7 +176,10 @@ class Chatbot:
                 movie = a + ' ' + movie[:-len(a)-2]
             if title.endswith(', ' + a):
                 title = a + ' ' + title[:-len(a)-2]
-        return title == movie
+        if self.levenshtein(movie, title) <= edit_distance:
+            return True
+        else:
+            return title in movie
 
     def find_movies_by_title(self, title):
         """ Given a movie title, return a list of indices of matching movies.
@@ -233,6 +236,26 @@ class Chatbot:
             return -1
         else:
             return 1
+
+    def levenshtein(self, s1, s2):
+        if len(s1) < len(s2):
+            return self.levenshtein(s2, s1)
+
+        # len(s1) >= len(s2)
+        if len(s2) == 0:
+            return len(s1)
+
+        previous_row = range(len(s2) + 1)
+        for i, c1 in enumerate(s1):
+            current_row = [i + 1]
+            for j, c2 in enumerate(s2):
+                insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
+                deletions = current_row[j] + 1       # than s2
+                substitutions = previous_row[j] + 2 * (c1 != c2)
+                current_row.append(min(insertions, deletions, substitutions))
+            previous_row = current_row
+        
+        return previous_row[-1]
     
     def extract_sentiment_for_movies(self, preprocessed_input):
         """Creative Feature: Extracts the sentiments from a line of pre-processed text
@@ -271,7 +294,12 @@ class Chatbot:
         :param max_distance: the maximum edit distance to search for
         :returns: a list of movie indices with titles closest to the given title and within edit distance max_distance
         """
-        pass
+        r = []
+        for i in range(len(self.titles)):
+            movie = self.titles[i][0]
+            if self.title_match(title.upper(), movie.upper(), edit_distance=3, substring_match=True):
+                r.append(i)
+        return r
 
     def disambiguate(self, clarification, candidates):
         """Creative Feature: Given a list of movies that the user could be talking about
