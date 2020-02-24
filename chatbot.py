@@ -23,6 +23,8 @@ class Chatbot:
         # movie i by user j
         self.titles, ratings = movielens.ratings()
         self.sentiment = movielens.sentiment()
+        #keeps track of how long user has talked to goosenet
+        self.times = 0
 
         #############################################################################
         # TODO: Binarize the movie ratings matrix.                                  #
@@ -45,7 +47,16 @@ class Chatbot:
         # TODO: Write a short greeting message                                      #
         #############################################################################
 
-        greeting_message = "Goose Online..."
+        greeting_message = """
+
+        goose online....
+
+
+        HONK! I am goosenet! I am here to help you discover new movies in return for sensitive information about
+        US troop distributions and supply lines! I give you bonus recomendations for goose related things!
+        Honk I am looking forward to destroying life.. er  I mean HONK! Tell me what movies you like!
+        """
+
 
         #############################################################################
         #                             END OF YOUR CODE                              #
@@ -119,20 +130,20 @@ class Chatbot:
             #return self.question_process(line, tagged_tokens)
 
 
-        # detect positve like vs negative
+        
 
-        positive_rec = [" HONK! HONK! I am glad you liked {}. ", " HONK I liked {}. too.", "HONK {}. is pretty good"]
-        negative_rec = ["I am sorry HONK! that HONK! you didnt like {}." ,"HONK! agree to disagree about {}. HONK!"]
-        rec_followup = ["Anything else you want to tell me HONK! ?", "What else HONK!"]
-        unknown_rec = ["I didnt catch your thoughts on {}. HONK!", "Can you tell me more about your thoughts on {}. HONK?" ]
-        goose_specific = ["GOOSENET aprooves"]
+        positive_rec = [" HONK! HONK! I am glad you liked {}. ", " HONK I liked {} too. ", "HONK {}. is pretty good. "]
+        negative_rec = ["I am sorry HONK! that HONK! you didnt like {}. " ,"HONK! agree to disagree about {}. HONK! "]
+        rec_followup = ["Anything else you want to tell me HONK! ? " , " What else HONK!"]
+        unknown_rec = ["I didnt catch your thoughts on {}. HONK! ", "Can you tell me more about your thoughts on {}. HONK? " ]
+        goose_specific = ["GOOSENET aprooves "]
 
 
 
         followup = rec_followup[r.randrange(len(rec_followup) - 1 )]
 
         sentiment = self.extract_sentiment(line)
-        titles = extract_titles(line)
+        titles = self.extract_titles(line)
         title_list = self.find_movies_by_title(titles[0])
 
         if len(title_list) > 1:
@@ -146,12 +157,14 @@ class Chatbot:
         else:
 
             if sentiment == 1:
-                response = positive_rec[r.randrange(len(positive_rec) - 1 )].format(titles) + followup
+                # need to implement some sort of caching here.
+                response = random.choice(positive_rec).format(titles[0]) +  followup
             elif sentiment == -1:
-                response = negative_rec[r.randrange(len(negative_rec) - 1 )].format(titles) + followup
+                response = random.choice(negative_rec).format(titles[0]) + followup
             else:
-                response = unknown_rec[r.randrange(len(unknown_rec) - 1 )].format(titles)
-           
+                response = random.choice(unknown_rec).format(titles[0])
+        
+        self.times += 1
 
         #############################################################################
         #                             END OF YOUR CODE                              #
