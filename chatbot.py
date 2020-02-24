@@ -271,7 +271,7 @@ class Chatbot:
             movie = self.titles[i][0]
             if self.title_match(title.upper(), movie.upper()):
                 r.append(i)
-            elif self.creative and self.title_match(title.upper(), movie.upper(), substring_match=True)
+            elif self.creative and self.title_match(title.upper(), movie.upper(), substring_match=True):
                 r.append(i)
         
         return r
