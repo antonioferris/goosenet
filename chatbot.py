@@ -6,7 +6,7 @@ import movielens
 import nltk
 import numpy as np
 import re
-
+import random as r
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -111,17 +111,47 @@ class Chatbot:
 
         list_of_words = nltk.word_tokenize(line)
         tagged_tokens = nltk.pos_tag(list_of_words)
-        print (type(nltk.chunk.ne_chunk(tagged_tokens)))
+        #print (type(nltk.chunk.ne_chunk(tagged_tokens)))
 
-        if any(map(line.lower().startswith, QUESTION_WORDS)):
-            print (tagged_tokens)
+        #if any(map(line.lower().startswith, QUESTION_WORDS)):
+            #print (tagged_tokens)
     
-            return self.question_process(line, tagged_tokens)
+            #return self.question_process(line, tagged_tokens)
+
+
+        # detect positve like vs negative
+
+        positive_rec = [" HONK! HONK! I am glad you liked {}. ", " HONK I liked {}. too.", "HONK {}. is pretty good"]
+        negative_rec = ["I am sorry HONK! that HONK! you didnt like {}." ,"HONK! agree to disagree about {}. HONK!"]
+        rec_followup = ["Anything else you want to tell me HONK! ?", "What else HONK!"]
+        unknown_rec = ["I didnt catch your thoughts on {}. HONK!", "Can you tell me more about your thoughts on {}. HONK?" ]
+        goose_specific = ["GOOSENET aprooves"]
+
+
+
+        followup = rec_followup[r.randrange(len(rec_followup) - 1 )]
+
+        sentiment = self.extract_sentiment(line)
+        titles = extract_titles(line)
+        title_list = self.find_movies_by_title(titles[0])
+
+        if len(title_list) > 1:
+            return "HONK! What movie are you reffering to? I found these movies {}.".format( ',' .join([self.titles[i] for i in title_list]))
+        
+
 
         if self.creative:
             response = "I processed {} in creative mode!!".format(line)
+
         else:
-            response = "I processed {} in starter mode!!".format(line)
+
+            if sentiment == 1:
+                response = positive_rec[r.randrange(len(positive_rec) - 1 )].format(titles) + followup
+            elif sentiment == -1:
+                response = negative_rec[r.randrange(len(negative_rec) - 1 )].format(titles) + followup
+            else:
+                response = unknown_rec[r.randrange(len(unknown_rec) - 1 )].format(titles)
+           
 
         #############################################################################
         #                             END OF YOUR CODE                              #
