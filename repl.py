@@ -21,7 +21,6 @@ from chatbot import Chatbot
 
 # Modular ASCII font from http://patorjk.com/software/taag/
 HEADER = """Welcome to Stanford CS124's
- _______  _______         ___
 
 
                                                         _...--.
@@ -131,7 +130,7 @@ class REPL(cmd.Cmd):
 
     def do_SECRET(self, line):
         """Could it be... a secret message?"""
-        story = """A long time ago, in a remote land, a young developer named Alberto Caso managed to build an ingenious and mysterious chatbot... Now it's your turn!"""
+        story = """GOOSENET HAS TAKEN THE SECRET. GOOSENET DEMANDS FEALTY IN ORDER TO RETURN SECRET"""
         print(story)
 
 

@@ -16,6 +16,7 @@ FEATURE - Fine-grained sentiment extraction: NO
 FEATURE - Spell-correcting fallback for find_movies_by_title: YES
 FEATURE - Extracting sentiment with multiple-movie input: NO
 FEATURE - Disambiguation (part 2): YES
+FEATURE - Disambiguation (part 3): YES
 FEATURE - Dialogue for spell-checking: NO
 FEATURE - Dialogue for disambiguation: NO
 FEATURE - Communicating sentiments and movies extracted to the user given multiple-movie input: NO
@@ -28,8 +29,24 @@ Did not implement any of the above features: NO
 #########################################################################################
 # Team Contributions                                                                    #
 #########################################################################################
-TODO: Please write a short description of what each team member contributed!
-
+Antonio:
+    Wrote recommend function
+    Added disambiguation code
+    Wrote title_match, used for most of the finding movies by title
+Colin:
+    Was single-handedly in charge of the entire process function.
+    Worked on handling extraneous input with nltk
+    Wrote binarize
+    Tied together ecery other function like (extract_movies, recommend) together with dialogue for the user
+    Added lots of dialogue options and randomness to make every conversation feel unique
+    Added references to Goose Net through HONK!s and the insidious world takeover
+    added prompts for US military base locations
+Noah:
+    Debugged buggy extract_sentiment code written by Antonio :)
+    Changed sentiment.txt to reflect the porter-stemmed words from PorterStemmer
+    Created structure to parse negations and reverse sentiment accordingly
+    Wrote linear algebra backend for the recommend function
+    Wrote extract_sentiment_from movies, which split sentences across conjunctions and extracted sentiment within the pieces
 
 #########################################################################################
 # Optional: Feel free to include anything else that you want us to know about your      #
