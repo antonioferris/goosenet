@@ -194,13 +194,30 @@ def test_find_movies_closest_to_title():
 def test_disambiguate():
     print("Testing disambiguate() functionality...")
     chatbot = Chatbot(True)
-
-    clarification = "1997"
-    candidates = [1359, 2716]
     if assertListEquals(
-            chatbot.disambiguate(clarification, candidates),
+            chatbot.disambiguate("1997", [1359, 2716]),
             [1359],
-            "Incorrect output for disambiguate('{}', {})".format(clarification, candidates),
+            "Incorrect output for disambiguate('{}', {})".format("1997", [1359, 2716]),
+            orderMatters=False
+    ) and assertListEquals(
+            chatbot.disambiguate("2", [1142, 1357, 2629, 546]),
+            [1357],
+            "Incorrect output for disambiguate('{}', {})".format("2", [1142, 1357, 2629, 546]),
+            orderMatters=False
+    ) and assertListEquals(
+            chatbot.disambiguate("Sorceror's Stone", [3812, 1267]),
+            [3812],
+            "Incorrect output for disambiguate('{}', {})".format("Sorceror's Stone", [3812, 1267]),
+            orderMatters=False
+    ) and assertListEquals(
+            chatbot.disambiguate("2", [8082, 4511, 1664]),
+            [4511],
+            "Incorrect output for disambiguate('{}', {})".format("2", [8082, 4511, 1664]),
+            orderMatters=False
+    ) and assertListEquals(
+            chatbot.disambiguate("most recent", [524, 5743]),
+            [524],
+            "Incorrect output for disambiguate('{}', {})".format("most recent", [524, 5743]),
             orderMatters=False
     ):
         print('disambiguate() sanity check passed!')
