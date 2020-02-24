@@ -271,6 +271,8 @@ class Chatbot:
             movie = self.titles[i][0]
             if self.title_match(title.upper(), movie.upper()):
                 r.append(i)
+            elif self.creative and self.title_match(title.upper(), movie.upper(), substring_match=True):
+                r.append(i)
         
         return r
 
@@ -323,6 +325,8 @@ class Chatbot:
         else:
             return 1
 
+    # modified from wikipedia starter code
+    # https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
     def levenshtein(self, s1, s2):
         if len(s1) < len(s2):
             return self.levenshtein(s2, s1)
@@ -383,7 +387,7 @@ class Chatbot:
         r = []
         for i in range(len(self.titles)):
             movie = self.titles[i][0]
-            if self.title_match(title.upper(), movie.upper(), edit_distance=3, substring_match=True):
+            if self.title_match(title.upper(), movie.upper(), edit_distance=3):
                 r.append(i)
         return r
 
