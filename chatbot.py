@@ -410,13 +410,47 @@ class Chatbot:
         :param candidates: a list of movie indices
         :returns: a list of indices corresponding to the movies identified by the clarification
         """
+        year_regex = re.compile('\(([0-9]{4})\)')
         def remains_valid(title):
             title_text = self.titles[title][0]
-            print(title_text)
+            movie_year = year_regex.findall(title_text)
+            # if there is a year present, we compare it with the clarification year (if clarification is an int)
+            # Otherwise, we just strip the year from the movie
+            if movie_year:
+                title_text = title_text[:-7]
+                try:
+                    clarification_year = int(clarification)
+                    if clarification_year == int(movie_year[0]):
+                        return True
+                except ValueError:
+                    pass
+
+            # If the clarification is a substring of the movie, title, it is probably the right movie
             if clarification in title_text:
                 return True
             return False
-        return list(filter(remains_valid, candidates))
+        # Filter the candiates out if they don't match the clarification (substring / year match)
+        filtered_candidates = list(filter(remains_valid, candidates))
+
+        try:
+            #If the clarification is an int, it might be an index into our list (1-indexed)
+            idx = int(clarification)
+            if 0 < idx <= len(candidates) and candidates[idx-1] not in filtered_candidates:
+                filtered_candidates.append(candidates[idx-1])
+        except ValueError:
+            pass
+
+        # check against time requests
+        if 'recent' in clarification or 'newest' in clarification:
+            # This function will try to find the year the movie came out in
+            def get_year(title):
+                try:
+                    return int(year_regex.findall(self.titles[title][0]))
+                except (ValueError,TypeError) as e:
+                    return -1
+            # If we want the "newest" movie, we add the max year (newest) movie to filtered_candidates
+            filtered_candidates.append(max(candidates, key = lambda t : get_year(t)))
+        return filtered_candidates
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #

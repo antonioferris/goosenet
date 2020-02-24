@@ -205,9 +205,9 @@ def test_disambiguate():
             "Incorrect output for disambiguate('{}', {})".format("2", [1142, 1357, 2629, 546]),
             orderMatters=False
     ) and assertListEquals(
-            chatbot.disambiguate("Sorceror's Stone", [3812, 1267]),
+            chatbot.disambiguate("Sorcerer's Stone", [3812, 1267]),
             [3812],
-            "Incorrect output for disambiguate('{}', {})".format("Sorceror's Stone", [3812, 1267]),
+            "Incorrect output for disambiguate('{}', {})".format("Sorcerer's Stone", [3812, 1267]),
             orderMatters=False
     ) and assertListEquals(
             chatbot.disambiguate("2", [8082, 4511, 1664]),
