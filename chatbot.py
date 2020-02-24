@@ -364,7 +364,7 @@ class Chatbot:
         :returns: a list of tuples, where the first item in the tuple is a movie title,
           and the second is the sentiment in the text toward that movie
         """
-        pass
+        return [('', 0)]
 
     def find_movies_closest_to_title(self, title, max_distance=3):
         """Creative Feature: Given a potentially misspelled movie title,
@@ -387,7 +387,7 @@ class Chatbot:
         r = []
         for i in range(len(self.titles)):
             movie = self.titles[i][0]
-            if self.title_match(title.upper(), movie.upper(), edit_distance=3):
+            if self.title_match(title.upper(), movie.upper(), edit_distance=max_distance):
                 r.append(i)
         return r
 
@@ -410,7 +410,13 @@ class Chatbot:
         :param candidates: a list of movie indices
         :returns: a list of indices corresponding to the movies identified by the clarification
         """
-        pass
+        def remains_valid(title):
+            title_text = self.titles[title][0]
+            print(title_text)
+            if clarification in title_text:
+                return True
+            return False
+        return list(filter(remains_valid, candidates))
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
