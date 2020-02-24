@@ -23,6 +23,7 @@ class Chatbot:
         # movie i by user j
         self.titles, ratings = movielens.ratings()
         self.sentiment = movielens.sentiment()
+        self.vec = np.zeros(len(self.titles))
         #keeps track of how long user has talked to goosenet
         self.times = 0
 
@@ -33,6 +34,7 @@ class Chatbot:
 
         # Binarize the movie ratings before storing the binarized matrix.
         self.ratings = ratings
+        self.binarized_ratings = self.binarize(ratings)
         #############################################################################
         #                             END OF YOUR CODE                              #
         #############################################################################
@@ -91,8 +93,25 @@ class Chatbot:
 
     def question_process(self, line, tagged_tokens):
         subjects = self.get_subjects(tagged_tokens)
-        return (" HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0]))
+        return (" HONK HONK I lNOW ALL about {}. BUT DONT TELL.".format(subjects[0]))
 
+    def loop_rec(self):
+        line = input("Would you like me to reccomend you a movie?")
+        rec =  self.recommend(self.vec, self.binarized_ratings)
+        i = 0
+        # logic not correct but bleh rn
+        while(line != "no" ):
+            
+            #print (" SELF VEC", self.vec)
+            #print ("\n RATINGS", self.binarized_ratings)
+
+            #print(" BEFORE RECCOMENDING")
+            i += 1
+            print(" I think you would like {}".format((self.titles[rec[i]][0])))
+            line = input("Would you like me to reccomend you another movie?")
+
+            #print("AFTER RECCOMEDING", reccomendations)
+        
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -140,15 +159,21 @@ class Chatbot:
 
 
 
-        followup = rec_followup[r.randrange(len(rec_followup) - 1 )]
+        followup = r.choice(rec_followup)
 
         sentiment = self.extract_sentiment(line)
         titles = self.extract_titles(line)
         title_list = self.find_movies_by_title(titles[0])
+     
 
         if len(title_list) > 1:
-            return "HONK! What movie are you reffering to? I found these movies {}.".format( ',' .join([self.titles[i] for i in title_list]))
-        
+            return "HONK! What movie are you reffering to? I found these movies {}.".format( ','.join([self.titles[i][0] for i in title_list]))
+        elif (len(title_list) == 0):
+            response = "HONK I havent heard of {} before.".format(titles[0])
+            possible_title = self.find_movies_closest_to_title(titles[0])
+            if len(possible_title) == 0:
+                return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
+            return (" HONK I can spell better and I dont even have hands. Perhaps you wanted one of these movies? {} HONK!".format( ','.join([self.titles[i][0] for i in possible_title])))
 
 
         if self.creative:
@@ -158,13 +183,18 @@ class Chatbot:
 
             if sentiment == 1:
                 # need to implement some sort of caching here.
-                response = random.choice(positive_rec).format(titles[0]) +  followup
+                response = r.choice(positive_rec).format(titles[0]) +  followup
+                self.times += 1
             elif sentiment == -1:
-                response = random.choice(negative_rec).format(titles[0]) + followup
+                response = r.choice(negative_rec).format(titles[0]) + followup
+                self.times += 1
             else:
-                response = random.choice(unknown_rec).format(titles[0])
+                response = r.choice(unknown_rec).format(titles[0])
+            self.vec[title_list[0]] = sentiment
         
-        self.times += 1
+        
+        if self.times >= 5:
+            self.loop_rec()
 
         #############################################################################
         #                             END OF YOUR CODE                              #
@@ -575,10 +605,8 @@ class Chatbot:
         can do and how the user can interact with it.
         """
         return """
-        Your task is to implement the chatbot as detailed in the PA6 instructions.
-        Remember: in the starter mode, movie names will come in quotation marks and
-        expressions of sentiment will be simple!
-        Write here the description for your own chatbot!
+        This is goosenet. Goosenet is an intelligent goose who secretly want to destroy the world by gathering
+        information through movie reccomendations. Goosenet has a bit of personality so be careful! Especally in what information you tell it.
         """
 
 
