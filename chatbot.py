@@ -7,7 +7,6 @@ import nltk
 import numpy as np
 import re
 import random as r
-from PorterStemmer import PorterStemmer
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -26,8 +25,6 @@ class Chatbot:
         self.sentiment = movielens.sentiment()
         #keeps track of how long user has talked to goosenet
         self.times = 0
-        #for stemming
-        self.p = PorterStemmer()
 
         #############################################################################
         # TODO: Binarize the movie ratings matrix.                                  #
@@ -277,11 +274,6 @@ class Chatbot:
         
         return r
 
-    def get_word_stemmed(self, word):
-        """ Given a word, returns the stemmed version of the word
-        """
-        return self.p.stem(word)
-
     def extract_sentiment(self, preprocessed_input):
         """Extract a sentiment rating from a line of pre-processed text.
 
@@ -313,10 +305,8 @@ class Chatbot:
 
         input_sentiment = 0
         for i in range(len(preprocessed_input)):
-            word = self.get_word_stemmed(preprocessed_input[i])
-            print("word: " + word)
             delta = 0
-            word_sentiment = self.sentiment.get(word, '') # default to empty string
+            word_sentiment = self.sentiment.get(preprocessed_input[i], '') # default to empty string
             if word_sentiment == 'pos':
                 delta = 1
             elif word_sentiment == 'neg':
