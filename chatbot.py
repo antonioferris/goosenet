@@ -387,7 +387,7 @@ class Chatbot:
         r = []
         for i in range(len(self.titles)):
             movie = self.titles[i][0]
-            if self.title_match(title.upper(), movie.upper(), edit_distance=3):
+            if self.title_match(title.upper(), movie.upper(), edit_distance=max_distance):
                 r.append(i)
         return r
 
