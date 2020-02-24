@@ -364,7 +364,16 @@ class Chatbot:
         :returns: a list of tuples, where the first item in the tuple is a movie title,
           and the second is the sentiment in the text toward that movie
         """
-        return [('', 0)]
+        result = []
+        conj_pat = re.compile('".+"(.and |.but |.for |.nor |.or |.so |.yet )".+"')
+        match = conj_pat.findall(preprocessed_input)
+        pieces = preprocessed_input.split(match[0]) #split on the first conjunction
+        for sentence_piece in pieces:
+            piece_sentiment = self.extract_sentiment(sentence_piece)
+            result.append(("movie here", piece_sentiment))
+
+        print(result)
+        return result
 
     def find_movies_closest_to_title(self, title, max_distance=3):
         """Creative Feature: Given a potentially misspelled movie title,
