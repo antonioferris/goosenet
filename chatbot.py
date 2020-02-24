@@ -219,27 +219,30 @@ class Chatbot:
         :param preprocessed_input: a user-supplied line of text that has been pre-processed with preprocess()
         :returns: a numerical value for the sentiment of the text
         """
-        preprocessed_input = preprocessed_input.lower().split()
+        preprocessed_input = preprocessed_input.lower().replace("'", "").split()
         NEGATION = r"""
-	    (?:
-        	^(?:never|no|nothing|nowhere|noone|none|not|
+        (?:
+            ^(?:never|no|nothing|nowhere|noone|none|not|
             havent|hasnt|hadnt|cant|couldnt|shouldnt|
             wont|wouldnt|dont|doesnt|didnt|isnt|arent|aint
-        	)$
-    	)
-    	|
-  		n't"""
-
-		NEGATION_RE = re.compile(NEGATION, re.VERBOSE)
+            )$
+        )
+        |
+        n't"""
+        NEGATION_RE = re.compile(NEGATION, re.VERBOSE)
 
         input_sentiment = 0
-        for w in preprocessed_input:
-            word_sentiment = self.sentiment.get(w, '') # default to empty string
+        for i in range(len(preprocessed_input)):
+            delta = 0
+            word_sentiment = self.sentiment.get(preprocessed_input[i], '') # default to empty string
             if word_sentiment == 'pos':
-                input_sentiment += 1
+                delta = 1
             elif word_sentiment == 'neg':
-                input_sentiment -= 1
-            print("input sentiment is: " + str(input_sentiment))
+                delta = -1
+            if i > 0 and NEGATION_RE.search(preprocessed_input[i-1]):
+                delta *= -1
+
+            input_sentiment += delta
 
         if input_sentiment == 0:
             return 0
