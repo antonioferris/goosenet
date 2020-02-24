@@ -410,7 +410,11 @@ class Chatbot:
         :param candidates: a list of movie indices
         :returns: a list of indices corresponding to the movies identified by the clarification
         """
-        pass
+        def remains_valid(clarification, title):
+            if clarification in title:
+                return True
+            return False
+        return list(filter(remains_valid, candidates))
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
