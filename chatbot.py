@@ -7,6 +7,7 @@ import nltk
 import numpy as np
 import re
 import random as r
+from goose import Goose
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -15,6 +16,9 @@ class Chatbot:
     def __init__(self, creative=False):
         # The chatbot's default name is `moviebot`. Give your chatbot a new name.
         self.name = 'goosenet'
+
+        # Initialize the goose responses
+        self.goose = Goose()
 
         self.creative = creative
 
@@ -96,7 +100,7 @@ class Chatbot:
         return (" HONK HONK I lNOW ALL about {}. BUT DONT TELL.".format(subjects[0]))
 
     def loop_rec(self):
-        line = input("Would you like me to reccomend you a movie?")
+        line = input(self.goose.recommendationApprovalDialogue(first_time=True))
         rec =  self.recommend(self.vec, self.binarized_ratings)
         i = 0
         # logic not correct but bleh rn
@@ -107,8 +111,8 @@ class Chatbot:
 
             #print(" BEFORE RECCOMENDING")
             i += 1
-            print(" I think you would like {}".format((self.titles[rec[i]][0])))
-            line = input("Would you like me to reccomend you another movie?")
+            print(self.goose.recommendationDialogue().format((self.titles[rec[i]][0])))
+            line = input(self.goose.recommendationApprovalDialogue(first_time=False))
 
             #print("AFTER RECCOMEDING", reccomendations)
         
@@ -137,55 +141,64 @@ class Chatbot:
         # possibly calling other functions. Although modular code is not graded,    #
         # it is highly recommended.                                                 #
         #############################################################################
+
         QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
 
-        list_of_words = nltk.word_tokenize(line)
-        tagged_tokens = nltk.pos_tag(list_of_words)
-        #print (type(nltk.chunk.ne_chunk(tagged_tokens)))
+        positive_rec = [
+            " HONK! HONK! I am glad you liked {}. ", 
+            " HONK I liked {} too. ", 
+            "HONK {}. is pretty good. "
+            ]
 
-        #if any(map(line.lower().startswith, QUESTION_WORDS)):
-            #print (tagged_tokens)
-    
-            #return self.question_process(line, tagged_tokens)
+        negative_rec = [
+            "I am sorry HONK! that HONK! you didnt like {}. " ,
+            "HONK! agree to disagree about {}. HONK! "
+            ]
 
+        rec_followup = [
+            "Anything else you want to tell me HONK! ? ", 
+            " What else HONK!"
+            ]
 
-        
+        unknown_rec = ["I didnt catch your thoughts on {}. HONK! ",
+            "Can you tell me more about your thoughts on {}. HONK? "
+            ]
 
-        positive_rec = [" HONK! HONK! I am glad you liked {}. ", " HONK I liked {} too. ", "HONK {}. is pretty good. "]
-        negative_rec = ["I am sorry HONK! that HONK! you didnt like {}. " ,"HONK! agree to disagree about {}. HONK! "]
-        rec_followup = ["Anything else you want to tell me HONK! ? " , " What else HONK!"]
-        unknown_rec = ["I didnt catch your thoughts on {}. HONK! ", "Can you tell me more about your thoughts on {}. HONK? " ]
         goose_specific = ["GOOSENET aprooves "]
-
-
 
         followup = r.choice(rec_followup)
 
+        # First, we try to see if the user is trying to tell us their opinions on a movie
         sentiment = self.extract_sentiment(line)
+        print(sentiment)
         titles = self.extract_titles(line)
+        if not titles:
+            # If we found no titles, we go to a general dialogue
+            return self.goose.noQuotedTitlesFoundDialogue()
         title_list = self.find_movies_by_title(titles[0])
      
+        def join_titles()
 
         if len(title_list) > 1:
-            return "HONK! What movie are you reffering to? I found these movies {}.".format( ','.join([self.titles[i][0] for i in title_list]))
+            # If we have more than 1 potential title, we need to disambiguate
+            # TODO expand disambiguation
+            return self.goose.disambiguationDialogue().format( ','.join([self.titles[i][0] for i in title_list]))
         elif (len(title_list) == 0):
-            response = "HONK I havent heard of {} before.".format(titles[0])
             possible_title = self.find_movies_closest_to_title(titles[0])
             if len(possible_title) == 0:
-                return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
-            return (" HONK I can spell better and I dont even have hands. Perhaps you wanted one of these movies? {} HONK!".format( ','.join([self.titles[i][0] for i in possible_title])))
+                return self.goose.noTitlesIdentified()
+            return self.goose.misspelled.format( ','.join([self.titles[i][0] for i in possible_title]))
 
 
         if self.creative:
             response = "I processed {} in creative mode!!".format(line)
 
         else:
-
-            if sentiment == 1:
+            if sentiment > 0:
                 # need to implement some sort of caching here.
                 response = r.choice(positive_rec).format(titles[0]) +  followup
                 self.times += 1
-            elif sentiment == -1:
+            elif sentiment < 0:
                 response = r.choice(negative_rec).format(titles[0]) + followup
                 self.times += 1
             else:
