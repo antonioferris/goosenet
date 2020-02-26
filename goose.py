@@ -24,7 +24,7 @@ class Goose:
     def recommendationDialogue(self):
         return " I think you would like {}"
 
-    def recommendationApprovalDialogue(first_time):
+    def recommendationApprovalDialogue(self, first_time):
         if first_time:
             return "Would you like me to recomend you a movie?"
         else:

@@ -187,7 +187,7 @@ class Chatbot:
             possible_title = self.find_movies_closest_to_title(titles[0])
             if len(possible_title) == 0:
                 return self.goose.noTitlesIdentified()
-            return self.goose.misspelled.format( ','.join([self.titles[i][0] for i in possible_title]))
+            return self.goose.misspelled().format( ','.join([self.titles[i][0] for i in possible_title]))
 
 
         if self.creative:
