@@ -20,6 +20,10 @@ class Chatbot:
         # Initialize the goose responses
         self.goose = Goose()
 
+        # initialize the current function and params which act as our state variable
+        self.curr_func = self.sayhi
+        self.params = {'a' : 'a', 'b' : 'bbbb', 'c' : '5'}
+
         self.creative = creative
 
         # This matrix has the following shape: num_movies x num_users
@@ -142,7 +146,8 @@ class Chatbot:
                     return None
                 title_list = [title_list[idx]]
         
-    def 
+    def sayhi(self, a, b, c, line):
+        return '\n'.join([str(a), str(b), str(c), str(line)])
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -168,30 +173,8 @@ class Chatbot:
         # possibly calling other functions. Although modular code is not graded,    #
         # it is highly recommended.                                                 #
         #############################################################################
-
-        QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
-
-        positive_rec = [
-            " HONK! HONK! I am glad you liked {}. ", 
-            " HONK I liked {} too. ", 
-            "HONK {}. is pretty good. "
-            ]
-
-        negative_rec = [
-            "I am sorry HONK! that HONK! you didnt like {}. " ,
-            "HONK! agree to disagree about {}. HONK! "
-            ]
-
-        rec_followup = [
-            "Anything else you want to tell me HONK! ? ", 
-            " What else HONK!"
-            ]
-
-        unknown_rec = ["I didnt catch your thoughts on {}. HONK! ",
-            "Can you tell me more about your thoughts on {}. HONK? "
-            ]
-
-        goose_specific = ["GOOSENET aprooves "]
+        self.params['line'] = line
+        return self.curr_func(**self.params)
 
         followup = r.choice(rec_followup)
 

@@ -53,11 +53,11 @@ class Goose:
     #dialouge for when the user gives a movie with positive sentiment
     def positiveSentiment(self):
 
-            positive_rec = [
-            " HONK! HONK! I am glad you liked {}. ", 
-            " HONK I liked {} too. ", 
-            "HONK {}. is pretty good. "
-            ]
+        positive_rec = [
+        " HONK! HONK! I am glad you liked {}. ", 
+        " HONK I liked {} too. ", 
+        "HONK {}. is pretty good. "
+        ]
         return random.choice(positive_rec)
     def negativeSentiment(self):
         negative_rec = [
