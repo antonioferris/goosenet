@@ -12,14 +12,19 @@ class Goose:
     def isNegativeResponse(self, user_input):
         return 'n' in user_input.lower()
 
+    def isAffirmativeResponse(self, user_input):
+        return 'y' in user_input.lower()
+
     def noQuotedTitlesFoundDialogue(self):
         return "I am a Goose on a mission.  If you're not talking movies or US supply lines, I don't want to talk."
 
     def disambiguationDialogue(self, misspelled):
         if misspelled:
-            return " HONK I can spell better and I dont even have hands. Perhaps you wanted one of these movies? {} HONK!"
+            return " HONK I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
         else:
-            return "HONK! What movie are you referring to?  Please clarify, because you might have meant any of: {}."
+            return "HONK! What movie are you referring to?  Please clarify, because you might have meant any of:\n{}"
+
+    def overDisambiguatedDialogue(self)
 
     def noTitlesIdentified(self):
         return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"

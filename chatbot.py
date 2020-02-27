@@ -112,17 +112,17 @@ class Chatbot:
         line = input(self.goose.recommendationApprovalDialogue(first_time=True))
         rec =  self.recommend(self.vec, self.binarized_ratings, k=20)
         i = 0
-        while not self.goose.isNegativeResponse(line):
+        while self.goose.isAffirmativeResponse(line):
             i += 1
             if i >= 20:
                 return self.goose.askedFor20MoviesDialgoue()
-            print(self.goose.recommendationDialogue().format(self.title_text(rec[i]))
+            print(self.goose.recommendationDialogue().format(self.title_text(rec[i])))
             line = input(self.goose.recommendationApprovalDialogue(first_time=False))
 
             #print("AFTER RECOMMENDING", reccomendations)
         return self.goose.postRecommendationDialogue(i > 0)
         
-    def disambiguate(self, title_list, misspelled=False):
+    def disambiguateDialogue(self, title_list, misspelled=False):
         while len(title_list) > 1:
             clarification = input(self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list])))
             title_list = self.disambiguate(clarification, title_list)
@@ -191,17 +191,21 @@ class Chatbot:
         if len(title_list) > 1:
             # If we have more than 1 potential title, we need to disambiguate
             # TODO expand disambiguation
-            title_list = self.disambiguate(title_list)
+            title_list = self.disambiguateDialogue(title_list)
         elif len(title_list) == 0:
             possible_titles = self.find_movies_closest_to_title(titles[0])
             if len(possible_titles) == 0:
                 return self.goose.noTitlesIdentified()
             else:
-                title_list = self.disambiguate(possible_titles, True)
+                title_list = self.disambiguateDialogue(possible_titles, True)
+        
+        # If the length of this list is 0, it means that diambiguation failed
+        # i.e they disambiguated until there was nothing left
+        if len(title_list) == 0:
+            return self.goose.overDisambiguatedDialogue()
 
         if self.creative:
             response = "I processed {} in creative mode!!".format(line)
-
         else:
             if sentiment > 0:
                 # need to implement some sort of caching here.
