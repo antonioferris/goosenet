@@ -24,7 +24,8 @@ class Goose:
         else:
             return "HONK! What movie are you referring to?  Please clarify, because you might have meant any of:\n{}"
 
-    def overDisambiguatedDialogue(self)
+    def indexDisambiguationDialogue(self):
+        return "Well now you've done it.  You need to be actually specific.  Please just type the number of the movie you want\n{}"
 
     def noTitlesIdentified(self):
         return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
@@ -44,6 +45,6 @@ class Goose:
         else:
             return "HONK!  What was the point of you asking about the movies then!"
 
-    def askedFor20MoviesDialgoue(self):
+    def askedFor20MoviesDialogue(self):
         return "Were the 20 movies I gave you not enough?  Let me know what you thought of them and I can recommend more"
     

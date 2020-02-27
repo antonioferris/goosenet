@@ -106,26 +106,41 @@ class Chatbot:
 
     def question_process(self, line, tagged_tokens):
         subjects = self.get_subjects(tagged_tokens)
-        return (" HONK HONK I lNOW ALL about {}. BUT DONT TELL.".format(subjects[0]))
+        return " HONK HONK I lNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
     def loop_rec(self):
+        # First, we ask if they want any recommendations
         line = input(self.goose.recommendationApprovalDialogue(first_time=True))
+        # We use the user vec to recommend 20 movies to them
         rec =  self.recommend(self.vec, self.binarized_ratings, k=20)
         i = 0
+        
+        # While we still have an affirmation to continue we give them recommendations!
         while self.goose.isAffirmativeResponse(line):
             i += 1
             if i >= 20:
-                return self.goose.askedFor20MoviesDialgoue()
+                return self.goose.askedFor20MoviesDialogue()
             print(self.goose.recommendationDialogue().format(self.title_text(rec[i])))
             line = input(self.goose.recommendationApprovalDialogue(first_time=False))
 
             #print("AFTER RECOMMENDING", reccomendations)
+        # If i > 0, they did use our goosenet to get a recom
         return self.goose.postRecommendationDialogue(i > 0)
         
     def disambiguateDialogue(self, title_list, misspelled=False):
         while len(title_list) > 1:
             clarification = input(self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list])))
-            title_list = self.disambiguate(clarification, title_list)
+            title_list_temp = self.disambiguate(clarification, title_list)
+            # If they over-clarified and we have none left we just ask them for the index they want point blank
+            if len(title_list_temp) == 0:
+                # This string is formatted with indexes in the array of each movie as well
+                index_dialogue = self.goose.indexDisambiguationDialogue().format('\n' + str(i) + '. '.join([self.title_text(i) for i in title_list])
+                s = input(index_dialogue)
+                try:
+                    idx = int(input(index_dialogue))
+                except ValueError:
+                    return None
+                title_list = [title_list[idx]]
         
 
     def process(self, line):
