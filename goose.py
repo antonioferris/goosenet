@@ -27,6 +27,9 @@ class Goose:
     def indexDisambiguationDialogue(self):
         return "Well now you've done it.  You need to be actually specific.  Please just type the number of the movie you want\n{}"
 
+    def failedDisambiguationDialogue(self):
+        return "Ok, lets just try this again.  Is there a movie you have an opinion about?"
+
     def noTitlesIdentified(self):
         return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
 

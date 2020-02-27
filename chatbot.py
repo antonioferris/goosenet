@@ -108,7 +108,7 @@ class Chatbot:
         subjects = self.get_subjects(tagged_tokens)
         return " HONK HONK I lNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
-    def loop_rec(self):
+    def recommendation_dialogue(self):
         # First, we ask if they want any recommendations
         line = input(self.goose.recommendationApprovalDialogue(first_time=True))
         # We use the user vec to recommend 20 movies to them
@@ -124,17 +124,17 @@ class Chatbot:
             line = input(self.goose.recommendationApprovalDialogue(first_time=False))
 
             #print("AFTER RECOMMENDING", reccomendations)
-        # If i > 0, they did use our goosenet to get a recom
+        # If i > 0, they did use our goosenet to get a recommendation.  Otherwise, they didn't
         return self.goose.postRecommendationDialogue(i > 0)
         
-    def disambiguateDialogue(self, title_list, misspelled=False):
+    def disambiguate_dialogue(self, title_list, misspelled=False):
         while len(title_list) > 1:
             clarification = input(self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list])))
             title_list_temp = self.disambiguate(clarification, title_list)
             # If they over-clarified and we have none left we just ask them for the index they want point blank
             if len(title_list_temp) == 0:
                 # This string is formatted with indexes in the array of each movie as well
-                index_dialogue = self.goose.indexDisambiguationDialogue().format('\n' + str(i) + '. '.join([self.title_text(i) for i in title_list])
+                index_dialogue = self.goose.indexDisambiguationDialogue().format('\n'.join([str(i) + '. ' + self.title_text(i) for i in title_list]))
                 s = input(index_dialogue)
                 try:
                     idx = int(input(index_dialogue))
@@ -142,6 +142,7 @@ class Chatbot:
                     return None
                 title_list = [title_list[idx]]
         
+    def 
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -196,7 +197,6 @@ class Chatbot:
 
         # First, we try to see if the user is trying to tell us their opinions on a movie
         sentiment = self.extract_sentiment(line)
-        print(sentiment)
         titles = self.extract_titles(line)
         if not titles:
             # If we found no titles, we go to a general dialogue
@@ -207,17 +207,16 @@ class Chatbot:
             # If we have more than 1 potential title, we need to disambiguate
             # TODO expand disambiguation
             title_list = self.disambiguateDialogue(title_list)
-        elif len(title_list) == 0:
-            possible_titles = self.find_movies_closest_to_title(titles[0])
-            if len(possible_titles) == 0:
-                return self.goose.noTitlesIdentified()
-            else:
-                title_list = self.disambiguateDialogue(possible_titles, True)
-        
-        # If the length of this list is 0, it means that diambiguation failed
-        # i.e they disambiguated until there was nothing left
-        if len(title_list) == 0:
-            return self.goose.overDisambiguatedDialogue()
+        # elif len(title_list) == 0:
+        #     possible_titles = self.find_movies_closest_to_title(titles[0])
+        #     if len(possible_titles) == 0:
+        #         return self.goose.noTitlesIdentified()
+        #     else:
+        #         title_list = self.disambiguateDialogue(possible_titles, True)
+
+        # The only reason title_list is a str is if the user quit in the disambiguation dialogue
+        if isinstance(title_list, str):
+            return title_list
 
         if self.creative:
             response = "I processed {} in creative mode!!".format(line)
