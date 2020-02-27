@@ -94,6 +94,15 @@ class Chatbot:
         words = [ i[0] for i in line if 'N' in i[1]] 
         return words
 
+    def title_text(self, i):
+            title_str = self.titles[i][0]
+            ARTICLES = {'A', 'An', 'The'}
+            for a in ARTICLES:
+                # If title ends with a comma appended article,
+                # We move the article back to the beginning to make the title seem more normal
+                if title_str.upper().endswith(', ' + a.upper()):
+                    title_str = a + ' ' + title_str[:-len(a)-2]
+            return title_str
 
     def question_process(self, line, tagged_tokens):
         subjects = self.get_subjects(tagged_tokens)
@@ -111,11 +120,13 @@ class Chatbot:
 
             #print(" BEFORE RECCOMENDING")
             i += 1
-            print(self.goose.recommendationDialogue().format((self.titles[rec[i]][0])))
+            print(self.goose.recommendationDialogue().format(self.title_text(rec[i]))
             line = input(self.goose.recommendationApprovalDialogue(first_time=False))
 
-            #print("AFTER RECCOMEDING", reccomendations)
+            #print("AFTER RECOMMENDING", reccomendations)
         
+    def disambiguate(self, title_list):
+
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -176,18 +187,16 @@ class Chatbot:
             # If we found no titles, we go to a general dialogue
             return self.goose.noQuotedTitlesFoundDialogue()
         title_list = self.find_movies_by_title(titles[0])
-     
-        def join_titles()
 
         if len(title_list) > 1:
             # If we have more than 1 potential title, we need to disambiguate
             # TODO expand disambiguation
-            return self.goose.disambiguationDialogue().format( ','.join([self.titles[i][0] for i in title_list]))
+            return self.goose.disambiguationDialogue().format( ','.join([self.title_text(i) for i in title_list]))
         elif (len(title_list) == 0):
             possible_title = self.find_movies_closest_to_title(titles[0])
             if len(possible_title) == 0:
                 return self.goose.noTitlesIdentified()
-            return self.goose.misspelled().format( ','.join([self.titles[i][0] for i in possible_title]))
+            return self.goose.misspelled().format( ','.join([self.title_text(i) for i in possible_title]))
 
 
         if self.creative:
@@ -207,7 +216,7 @@ class Chatbot:
         
         
         if self.times >= 5:
-            self.loop_rec()
+            response = self.loop_rec()
 
         #############################################################################
         #                             END OF YOUR CODE                              #
