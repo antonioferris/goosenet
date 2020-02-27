@@ -1,0 +1,16 @@
+I dislike "the notebook"
+I like "cars 2"
+I dislike "matilda"
+I like "used cars"
+I like "american pie 2"
+yes
+yes
+yes
+no
+I dislike " american heart"
+no
+I like "despicable me 2"
+yes
+yes
+yes
+quit:

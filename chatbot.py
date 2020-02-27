@@ -7,7 +7,11 @@ import nltk
 import numpy as np
 import re
 import random as r
+<<<<<<< HEAD
 from PorterStemmer import PorterStemmer
+=======
+from goose import Goose
+>>>>>>> 61e56adbe026693001cc7d1d20ca905810342d93
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -16,6 +20,13 @@ class Chatbot:
     def __init__(self, creative=False):
         # The chatbot's default name is `moviebot`. Give your chatbot a new name.
         self.name = 'goosenet'
+
+        # Initialize the goose responses
+        self.goose = Goose()
+
+        # initialize the current function and params which act as our state variable
+        self.curr_func = self.acquire_movie_preferences
+        self.params = {}
 
         self.creative = creative
 
@@ -91,28 +102,100 @@ class Chatbot:
         words = [ i[0] for i in line if 'N' in i[1]] 
         return words
 
+    def title_text(self, i):
+            title_str = self.titles[i][0]
+            ARTICLES = {'A', 'An', 'The'}
+            for a in ARTICLES:
+                # If title ends with a comma appended article,
+                # We move the article back to the beginning to make the title seem more normal
+                if title_str.upper().endswith(', ' + a.upper()):
+                    title_str = a + ' ' + title_str[:-len(a)-2]
+            return title_str
 
     def question_process(self, line, tagged_tokens):
         subjects = self.get_subjects(tagged_tokens)
-        return (" HONK HONK I lNOW ALL about {}. BUT DONT TELL.".format(subjects[0]))
+        return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
-    def loop_rec(self):
-        line = input("Would you like me to reccomend you a movie?")
-        rec =  self.recommend(self.vec, self.binarized_ratings)
+    def recommendation_dialogue(self, line, rec, i):
+        # First, we ask if they want any recommendations
+        line = input(self.goose.recommendationApprovalDialogue(first_time=True))
+        # We use the user vec to recommend 20 movies to them
+        rec =  self.recommend(self.vec, self.binarized_ratings, k=20)
         i = 0
-        # logic not correct but bleh rn
-        while(line != "no" ):
-            
-            #print (" SELF VEC", self.vec)
-            #print ("\n RATINGS", self.binarized_ratings)
-
-            #print(" BEFORE RECCOMENDING")
-            i += 1
-            print(" I think you would like {}".format((self.titles[rec[i]][0])))
-            line = input("Would you like me to reccomend you another movie?")
-
-            #print("AFTER RECCOMEDING", reccomendations)
         
+        # While we still have an affirmation to continue we give them recommendations!
+        while self.goose.isAffirmativeResponse(line):
+            i += 1
+            if i >= 20:
+                return self.goose.askedFor20MoviesDialogue()
+            print(self.goose.recommendationDialogue().format(self.title_text(rec[i])))
+            line = input(self.goose.recommendationApprovalDialogue(first_time=False))
+
+            #print("AFTER RECOMMENDING", reccomendations)
+        # If i > 0, they did use our goosenet to get a recommendation.  Otherwise, they didn't
+        return self.goose.postRecommendationDialogue(i > 0)
+        
+    def disambiguate_dialogue(self, title_list, line, misspelled=False):
+        clarification = line
+        title_list = self.disambiguate(clarification, title_list)
+        # If we are done, we go back to the get movie preferences function
+        if len(title_list) == 1:
+            self.acquire_movie_preferences(self, title_list, line=None)
+        else:
+            self.params['title_list'] = title_list
+            return self.goose.disambiguationDialogue().format( '\n'.join([self.title_text(i) for i in title_list]))
+        # # If they over-clarified and we have none left we just ask them for the index they want point blank
+        # if len(title_list_temp) == 0:
+        #     # This string is formatted with indexes in the array of each movie as well
+        #     return self.goose.indexDisambiguationDialogue().format('\n'.join([str(i) + '. ' + self.title_text(i) for i in title_list]))
+        #     s = input(index_dialogue)
+        #     try:
+        #         idx = int(input(index_dialogue))
+        #     except ValueError:
+        #         return None
+        #     title_list = [title_list[idx]]
+
+    def acquire_movie_preferences(self, line, title_list = None):
+        # First, we try to see if the user is trying to tell us their opinions on a movie
+        # If title_list is None, we should be looking for a new title
+        if not title_list:
+            sentiment = self.extract_sentiment(line)
+            titles = self.extract_titles(line)
+            if not titles:
+                # If we found no titles, we go to a general dialogue
+                return self.goose.noQuotedTitlesFoundDialogue()
+            title_list = self.find_movies_by_title(titles[0])
+        
+        # Otherwise, we already have a title_list and might be trying to disambiguate it
+        if len(title_list) > 1:
+            # If we have more than 1 potential title, we need to disambiguate
+            self.params = {'title_list' : title_list}
+            self.curr_func = self.disambiguate_dialogue
+            return self.goose.disambiguationDialogue(False).format('\n'.join([self.title_text(i) for i in title_list]))
+        elif len(title_list) == 0:
+            return self.goose.noTitlesIdentified()
+            # possible_titles = self.find_movies_closest_to_title(titles[0])
+            # if len(possible_titles) == 0:
+            #     return self.goose.noTitlesIdentified()
+            # else:
+            #     title_list = self.disambiguate_dialogue(possible_titles, True)
+        
+        followup = self.goose.positiveSentiment()
+        print('sent:', sentiment)
+        if sentiment > 0:
+            # need to implement some sort of caching here.
+            response = self.goose.positiveSentiment().format(titles[0]) +  followup
+            self.times += 1
+        elif sentiment < 0:
+            response = self.goose.negativeSentiment().format(titles[0]) + followup
+            self.times += 1
+        else:
+            response = self.goose.unknownSentiment().format(titles[0])
+        self.vec[title_list[0]] = sentiment
+        if self.times >= 5:
+            self.curr_func = self.recommendation_dialogue
+            response = self.recommendation_dialogue
+        return response
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -138,68 +221,8 @@ class Chatbot:
         # possibly calling other functions. Although modular code is not graded,    #
         # it is highly recommended.                                                 #
         #############################################################################
-        QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
-
-        list_of_words = nltk.word_tokenize(line)
-        tagged_tokens = nltk.pos_tag(list_of_words)
-        #print (type(nltk.chunk.ne_chunk(tagged_tokens)))
-
-        #if any(map(line.lower().startswith, QUESTION_WORDS)):
-            #print (tagged_tokens)
-    
-            #return self.question_process(line, tagged_tokens)
-
-
-        
-
-        positive_rec = [" HONK! HONK! I am glad you liked {}. ", " HONK I liked {} too. ", "HONK {}. is pretty good. "]
-        negative_rec = ["I am sorry HONK! that HONK! you didnt like {}. " ,"HONK! agree to disagree about {}. HONK! "]
-        rec_followup = ["Anything else you want to tell me HONK! ? " , " What else HONK!"]
-        unknown_rec = ["I didnt catch your thoughts on {}. HONK! ", "Can you tell me more about your thoughts on {}. HONK? " ]
-        goose_specific = ["GOOSENET aprooves "]
-
-
-
-        followup = r.choice(rec_followup)
-
-        sentiment = self.extract_sentiment(line)
-        titles = self.extract_titles(line)
-        title_list = self.find_movies_by_title(titles[0])
-     
-
-        if len(title_list) > 1:
-            return "HONK! What movie are you reffering to? I found these movies {}.".format( ','.join([self.titles[i][0] for i in title_list]))
-        elif (len(title_list) == 0):
-            response = "HONK I havent heard of {} before.".format(titles[0])
-            possible_title = self.find_movies_closest_to_title(titles[0])
-            if len(possible_title) == 0:
-                return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
-            return (" HONK I can spell better and I dont even have hands. Perhaps you wanted one of these movies? {} HONK!".format( ','.join([self.titles[i][0] for i in possible_title])))
-
-
-        if self.creative:
-            response = "I processed {} in creative mode!!".format(line)
-
-        else:
-
-            if sentiment == 1:
-                # need to implement some sort of caching here.
-                response = r.choice(positive_rec).format(titles[0]) +  followup
-                self.times += 1
-            elif sentiment == -1:
-                response = r.choice(negative_rec).format(titles[0]) + followup
-                self.times += 1
-            else:
-                response = r.choice(unknown_rec).format(titles[0])
-            self.vec[title_list[0]] = sentiment
-        
-        
-        if self.times >= 5:
-            self.loop_rec()
-
-        #############################################################################
-        #                             END OF YOUR CODE                              #
-        #############################################################################
+        self.params['line'] = line
+        response = self.curr_func(**self.params)
         return response
    
 
