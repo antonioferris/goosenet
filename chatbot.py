@@ -7,6 +7,7 @@ import nltk
 import numpy as np
 import re
 import random as r
+from PorterStemmer import PorterStemmer
 from goose import Goose
 import inspect
 
@@ -287,7 +288,7 @@ class Chatbot:
         :returns: list of movie titles that are potentially in the text
         """
         titles = []
-        title_pat = re.compile('"(.+)"')
+        title_pat = re.compile('"([^"]+)"')
         matches = title_pat.findall(preprocessed_input)
         titles.extend(matches)
         return titles
@@ -344,6 +345,37 @@ class Chatbot:
         
         return r
 
+    def get_stemmed(self, preprocessed_input):
+        """
+        Stems the string and returns it stemmed
+        """
+        print("UNSTEMMED: " + preprocessed_input)
+        p = PorterStemmer()
+        output, word = '', ''
+        for c in preprocessed_input:
+            if c.isalpha():
+                word += c.lower()
+            else:
+                if word:
+                    output += p.stem(word, 0,len(word)-1)
+                    word = ''
+                output += c.lower()
+        print("STEMMED: " + output)
+        return output
+
+    def removed_titles(self, preprocessed_input):
+        """
+        Removes the movie titles from the string.
+        Also removes the last period.
+        """
+        titles = self.extract_titles(preprocessed_input)
+        for title in titles:
+            print(title)
+            preprocessed_input = preprocessed_input.replace(title, '')
+            preprocessed_input = preprocessed_input.replace("\"", '').strip('.')
+        print(preprocessed_input)
+        return preprocessed_input
+
     def extract_sentiment(self, preprocessed_input):
         """Extract a sentiment rating from a line of pre-processed text.
 
@@ -361,7 +393,9 @@ class Chatbot:
         :param preprocessed_input: a user-supplied line of text that has been pre-processed with preprocess()
         :returns: a numerical value for the sentiment of the text
         """
-        preprocessed_input = preprocessed_input.lower().replace("'", "").split()
+        no_titles = self.removed_titles(preprocessed_input)
+        preprocessed_input = self.get_stemmed(no_titles).split()
+        
         NEGATION = r"""
         (?:
             ^(?:never|no|nothing|nowhere|noone|none|not|
@@ -415,6 +449,22 @@ class Chatbot:
         
         return previous_row[-1]
     
+    def get_previous_sentiment(self, pieces, i):
+        """
+        Recursively finds the move sentiment for a certain film by looking at the sentiment
+        of the previous phrase. For example: "I liked both "I, Robot" and "Ex Machina"."
+        After extract_sentiment_for_movies splits this into pieces, we would find the
+        sentiment for "I, Robot" to be 1 and since "Ex Machina" would have a sentiment of
+        0, we want to map the same sentiment from the first movie onto the second.
+        """
+        sentiment = self.extract_sentiment(pieces[i])
+        if sentiment != 0:
+            return sentiment
+        elif sentiment == 0 and "not" in pieces[i]:
+            return -get_previous_sentiment(sentiment, i - 1)
+        else:
+            return get_previous_sentiment(sentiment, i - 1)
+
     def extract_sentiment_for_movies(self, preprocessed_input):
         """Creative Feature: Extracts the sentiments from a line of pre-processed text
         that may contain multiple movies. Note that the sentiments toward
@@ -436,9 +486,15 @@ class Chatbot:
         conj_pat = re.compile('".+"(.and |.but |.for |.nor |.or |.so |.yet )".+"')
         match = conj_pat.findall(preprocessed_input)
         pieces = preprocessed_input.split(match[0]) #split on the first conjunction
-        for sentence_piece in pieces:
-            piece_sentiment = self.extract_sentiment(sentence_piece)
-            result.append(("movie here", piece_sentiment))
+
+        titles = self.extract_titles(preprocessed_input)
+        print(titles)
+        for i in range(len(pieces)):
+            print(i)
+            sentiment = self.extract_sentiment(pieces[i])
+            if sentiment == 0: #if no sentiment :/
+                sentiment = get_previous_sentiment()
+            result.append((titles[i], sentiment))
 
         print(result)
         return result

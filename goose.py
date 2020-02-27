@@ -45,14 +45,14 @@ class Goose:
         return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
 
     def recommendationDialogue(self):
-            rec = [
+        rec = [
                  " I think you would like {}",
                  " Have you considered {}",
                  "Have you heard of {}",
                  "{} is NOT my cup of tea but it might fir your terrible taste. HONK!",
                  "HONK! Consider watching {}, you might like it"
 
-            ]
+        ]
         return random.choice(rec)
 
     def recommendationApprovalDialogue(self, first_time):
