@@ -21,8 +21,8 @@ class Chatbot:
         self.goose = Goose()
 
         # initialize the current function and params which act as our state variable
-        self.curr_func = self.sayhi
-        self.params = {'a' : 'a', 'b' : 'bbbb', 'c' : '5'}
+        self.curr_func = self.acquire_movie_preferences
+        self.params = {}
 
         self.creative = creative
 
@@ -110,9 +110,9 @@ class Chatbot:
 
     def question_process(self, line, tagged_tokens):
         subjects = self.get_subjects(tagged_tokens)
-        return " HONK HONK I lNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
+        return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
-    def recommendation_dialogue(self):
+    def recommendation_dialogue(self, line, rec, i):
         # First, we ask if they want any recommendations
         line = input(self.goose.recommendationApprovalDialogue(first_time=True))
         # We use the user vec to recommend 20 movies to them
@@ -131,23 +131,58 @@ class Chatbot:
         # If i > 0, they did use our goosenet to get a recommendation.  Otherwise, they didn't
         return self.goose.postRecommendationDialogue(i > 0)
         
-    def disambiguate_dialogue(self, title_list, misspelled=False):
-        while len(title_list) > 1:
-            clarification = input(self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list])))
-            title_list_temp = self.disambiguate(clarification, title_list)
-            # If they over-clarified and we have none left we just ask them for the index they want point blank
-            if len(title_list_temp) == 0:
-                # This string is formatted with indexes in the array of each movie as well
-                index_dialogue = self.goose.indexDisambiguationDialogue().format('\n'.join([str(i) + '. ' + self.title_text(i) for i in title_list]))
-                s = input(index_dialogue)
-                try:
-                    idx = int(input(index_dialogue))
-                except ValueError:
-                    return None
-                title_list = [title_list[idx]]
+    def disambiguate_dialogue(self, title_list, line, misspelled=False):
+        clarification = line
+        title_list_temp = self.disambiguate(clarification, title_list)
+        # If they over-clarified and we have none left we just ask them for the index they want point blank
+        if len(title_list_temp) == 0:
+            # This string is formatted with indexes in the array of each movie as well
+            return self.goose.indexDisambiguationDialogue().format('\n'.join([str(i) + '. ' + self.title_text(i) for i in title_list]))
+            s = input(index_dialogue)
+            try:
+                idx = int(input(index_dialogue))
+            except ValueError:
+                return None
+            title_list = [title_list[idx]]
+
+    def acquire_movie_preferences(self, line, title_list = None):
+        # First, we try to see if the user is trying to tell us their opinions on a movie
+        # If title_list is None, we should be looking for a new title
+        if not title_list:
+            sentiment = self.extract_sentiment(line)
+            titles = self.extract_titles(line)
+            if not titles:
+                # If we found no titles, we go to a general dialogue
+                return self.goose.noQuotedTitlesFoundDialogue()
+            title_list = self.find_movies_by_title(titles[0])
         
-    def sayhi(self, a, b, c, line):
-        return '\n'.join([str(a), str(b), str(c), str(line)])
+        # Otherwise, we already have a title_list and might be trying to disambiguate it
+        if len(title_list) > 1:
+            # If we have more than 1 potential title, we need to disambiguate
+            self.params = {'title_list' : title_list}
+            self.curr_func = self.disambiguateDialogue(title_list)
+            return self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list]))
+        elif len(title_list) == 0:
+            possible_titles = self.find_movies_closest_to_title(titles[0])
+            if len(possible_titles) == 0:
+                return self.goose.noTitlesIdentified()
+            else:
+                title_list = self.disambiguateDialogue(possible_titles, True)
+
+        followup = r.choice(rec_followup)
+
+            if sentiment > 0:
+                # need to implement some sort of caching here.
+                response = r.choice(positive_rec).format(titles[0]) +  followup
+                self.times += 1
+            elif sentiment < 0:
+                response = r.choice(negative_rec).format(titles[0]) + followup
+                self.times += 1
+            else:
+                response = r.choice(unknown_rec).format(titles[0])
+            self.vec[title_list[0]] = sentiment
+        if self.times >= 5:
+            response = self.loop_rec()
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -174,54 +209,7 @@ class Chatbot:
         # it is highly recommended.                                                 #
         #############################################################################
         self.params['line'] = line
-        return self.curr_func(**self.params)
-
-        followup = r.choice(rec_followup)
-
-        # First, we try to see if the user is trying to tell us their opinions on a movie
-        sentiment = self.extract_sentiment(line)
-        titles = self.extract_titles(line)
-        if not titles:
-            # If we found no titles, we go to a general dialogue
-            return self.goose.noQuotedTitlesFoundDialogue()
-        title_list = self.find_movies_by_title(titles[0])
-
-        if len(title_list) > 1:
-            # If we have more than 1 potential title, we need to disambiguate
-            # TODO expand disambiguation
-            title_list = self.disambiguateDialogue(title_list)
-        # elif len(title_list) == 0:
-        #     possible_titles = self.find_movies_closest_to_title(titles[0])
-        #     if len(possible_titles) == 0:
-        #         return self.goose.noTitlesIdentified()
-        #     else:
-        #         title_list = self.disambiguateDialogue(possible_titles, True)
-
-        # The only reason title_list is a str is if the user quit in the disambiguation dialogue
-        if isinstance(title_list, str):
-            return title_list
-
-        if self.creative:
-            response = "I processed {} in creative mode!!".format(line)
-        else:
-            if sentiment > 0:
-                # need to implement some sort of caching here.
-                response = r.choice(positive_rec).format(titles[0]) +  followup
-                self.times += 1
-            elif sentiment < 0:
-                response = r.choice(negative_rec).format(titles[0]) + followup
-                self.times += 1
-            else:
-                response = r.choice(unknown_rec).format(titles[0])
-            self.vec[title_list[0]] = sentiment
-        
-        
-        if self.times >= 5:
-            response = self.loop_rec()
-
-        #############################################################################
-        #                             END OF YOUR CODE                              #
-        #############################################################################
+        response = self.curr_func(**self.params)
         return response
    
 
