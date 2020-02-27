@@ -168,31 +168,9 @@ class Chatbot:
         # it is highly recommended.                                                 #
         #############################################################################
 
-        QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
 
-        positive_rec = [
-            " HONK! HONK! I am glad you liked {}. ", 
-            " HONK I liked {} too. ", 
-            "HONK {}. is pretty good. "
-            ]
 
-        negative_rec = [
-            "I am sorry HONK! that HONK! you didnt like {}. " ,
-            "HONK! agree to disagree about {}. HONK! "
-            ]
-
-        rec_followup = [
-            "Anything else you want to tell me HONK! ? ", 
-            " What else HONK!"
-            ]
-
-        unknown_rec = ["I didnt catch your thoughts on {}. HONK! ",
-            "Can you tell me more about your thoughts on {}. HONK? "
-            ]
-
-        goose_specific = ["GOOSENET aprooves "]
-
-        followup = r.choice(rec_followup)
+        followup = Goose.positiveSentiment()
 
         # First, we try to see if the user is trying to tell us their opinions on a movie
         sentiment = self.extract_sentiment(line)
@@ -224,13 +202,13 @@ class Chatbot:
         else:
             if sentiment > 0:
                 # need to implement some sort of caching here.
-                response = r.choice(positive_rec).format(titles[0]) +  followup
+                response = Goose.positiveSentiment().format(titles[0]) +  followup
                 self.times += 1
             elif sentiment < 0:
-                response = r.choice(negative_rec).format(titles[0]) + followup
+                response = Goose.negativeSentiment().format(titles[0]) + followup
                 self.times += 1
             else:
-                response = r.choice(unknown_rec).format(titles[0])
+                response = Goose.unknownSentiment().format(titles[0])
             self.vec[title_list[0]] = sentiment
         
         
