@@ -8,6 +8,17 @@ import numpy as np
 import re
 import random as r
 from goose import Goose
+import inspect
+
+def dump_args(func):
+    """Decorator to print function call details - parameters names and effective values.
+    """
+    def wrapper(*args, **kwargs):
+        func_args = inspect.signature(func).bind(*args, **kwargs).arguments
+        func_args_str =  ', '.join('{} = {!r}'.format(*item) for item in func_args.items())
+        print(f'{func.__module__}.{func.__qualname__} ( {func_args_str} )')
+        return func(*args, **kwargs)
+    return wrapper
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -136,7 +147,11 @@ class Chatbot:
         title_list = self.disambiguate(clarification, title_list)
         # If we are done, we go back to the get movie preferences function
         if len(title_list) == 1:
-            self.acquire_movie_preferences(self, title_list, line=None)
+            return self.update_with_preferences(title_list)
+        elif len(title_list) == 0:
+            self.params = {'title_list' : title_list}
+            self.curr_func = self.acquire_movie_preferences
+            return self.goose.failedDisambiguationDialogue()
         else:
             self.params['title_list'] = title_list
             return self.goose.disambiguationDialogue().format( '\n'.join([self.title_text(i) for i in title_list]))
@@ -151,11 +166,30 @@ class Chatbot:
         #         return None
         #     title_list = [title_list[idx]]
 
-    def acquire_movie_preferences(self, line, title_list = None):
+    def update_with_preferences(self, title_list):
+        sentiment = self.sentiment_rating
+        print('sent:', sentiment)
+        if sentiment > 0:
+            # need to implement some sort of caching here.
+            response = self.goose.positiveSentiment().format(self.title_text(title_list[0]))
+            self.times += 1
+        elif sentiment < 0:
+            response = self.goose.negativeSentiment().format(self.title_text(title_list[0]))
+            self.times += 1
+        else:
+            response = self.goose.unknownSentiment().format(self.title_text(title_list[0]))
+        self.vec[title_list[0]] = sentiment
+        if self.times >= 5:
+            self.curr_func = self.recommendation_dialogue
+            response = self.recommendation_dialogue
+        return response
+
+    @dump_args
+    def acquire_movie_preferences(self, line = None, title_list = None):
         # First, we try to see if the user is trying to tell us their opinions on a movie
         # If title_list is None, we should be looking for a new title
         if not title_list:
-            sentiment = self.extract_sentiment(line)
+            self.sentiment_rating = self.extract_sentiment(line)
             titles = self.extract_titles(line)
             if not titles:
                 # If we found no titles, we go to a general dialogue
@@ -175,23 +209,7 @@ class Chatbot:
             #     return self.goose.noTitlesIdentified()
             # else:
             #     title_list = self.disambiguate_dialogue(possible_titles, True)
-        
-        followup = self.goose.positiveSentiment()
-        print('sent:', sentiment)
-        if sentiment > 0:
-            # need to implement some sort of caching here.
-            response = self.goose.positiveSentiment().format(titles[0]) +  followup
-            self.times += 1
-        elif sentiment < 0:
-            response = self.goose.negativeSentiment().format(titles[0]) + followup
-            self.times += 1
-        else:
-            response = self.goose.unknownSentiment().format(titles[0])
-        self.vec[title_list[0]] = sentiment
-        if self.times >= 5:
-            self.curr_func = self.recommendation_dialogue
-            response = self.recommendation_dialogue
-        return response
+        return self.update_with_preferences(title_list)
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
