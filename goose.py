@@ -8,7 +8,7 @@ class Goose:
     def __init__(self):
         self.state = 'GATHERING'
         self.times = 0
-
+        self.QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
     def isNegativeResponse(self, user_input):
         return 'n' in user_input.lower()
 
@@ -50,4 +50,25 @@ class Goose:
 
     def askedFor20MoviesDialogue(self):
         return "Were the 20 movies I gave you not enough?  Let me know what you thought of them and I can recommend more"
-    
+    #dialouge for when the user gives a movie with positive sentiment
+    def positiveSentiment(self):
+
+            positive_rec = [
+            " HONK! HONK! I am glad you liked {}. ", 
+            " HONK I liked {} too. ", 
+            "HONK {}. is pretty good. "
+            ]
+        return random.choice(positive_rec)
+    def negativeSentiment(self):
+        negative_rec = [
+            "I am sorry HONK! that HONK! you didnt like {}. " ,
+            "HONK! agree to disagree about {}. HONK! "
+            ]
+        return random.choice(negative_rec)                
+    def sentimentFollowUp(self):
+        rec_followup = [
+            "Anything else you want to tell me HONK! ? ", 
+            " What else HONK!"
+            ]
+        return random.choice(rec_followup)
+
