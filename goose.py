@@ -9,17 +9,20 @@ class Goose:
         self.state = 'GATHERING'
         self.times = 0
 
+    def isNegativeResponse(self, user_input):
+        return 'n' in user_input.lower()
+
     def noQuotedTitlesFoundDialogue(self):
         return "I am a Goose on a mission.  If you're not talking movies or US supply lines, I don't want to talk."
 
-    def disambiguationDialogue(self):
-        return "HONK! What movie are you reffering to? I found these movies {}."
+    def disambiguationDialogue(self, misspelled):
+        if misspelled:
+            return " HONK I can spell better and I dont even have hands. Perhaps you wanted one of these movies? {} HONK!"
+        else:
+            return "HONK! What movie are you referring to?  Please clarify, because you might have meant any of: {}."
 
     def noTitlesIdentified(self):
         return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
-
-    def misspelled(self):
-        return " HONK I can spell better and I dont even have hands. Perhaps you wanted one of these movies? {} HONK!"
 
     def recommendationDialogue(self):
         return " I think you would like {}"
@@ -29,4 +32,13 @@ class Goose:
             return "Would you like me to recomend you a movie?"
         else:
             return "Would you like me to recomend you another movie?"
+
+    def postRecommendationDialogue(self, used):
+        if used:
+            return "Hope you enjoyed these recommendations!"
+        else:
+            return "HONK!  What was the point of you asking about the movies then!"
+
+    def askedFor20MoviesDialgoue(self):
+        return "Were the 20 movies I gave you not enough?  Let me know what you thought of them and I can recommend more"
     

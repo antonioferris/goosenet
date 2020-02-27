@@ -110,23 +110,23 @@ class Chatbot:
 
     def loop_rec(self):
         line = input(self.goose.recommendationApprovalDialogue(first_time=True))
-        rec =  self.recommend(self.vec, self.binarized_ratings)
+        rec =  self.recommend(self.vec, self.binarized_ratings, k=20)
         i = 0
-        # logic not correct but bleh rn
-        while(line != "no" ):
-            
-            #print (" SELF VEC", self.vec)
-            #print ("\n RATINGS", self.binarized_ratings)
-
-            #print(" BEFORE RECCOMENDING")
+        while not self.goose.isNegativeResponse(line):
             i += 1
+            if i >= 20:
+                return self.goose.askedFor20MoviesDialgoue()
             print(self.goose.recommendationDialogue().format(self.title_text(rec[i]))
             line = input(self.goose.recommendationApprovalDialogue(first_time=False))
 
             #print("AFTER RECOMMENDING", reccomendations)
+        return self.goose.postRecommendationDialogue(i > 0)
         
-    def disambiguate(self, title_list):
-
+    def disambiguate(self, title_list, misspelled=False):
+        while len(title_list) > 1:
+            clarification = input(self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list])))
+            title_list = self.disambiguate(clarification, title_list)
+        
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -191,13 +191,13 @@ class Chatbot:
         if len(title_list) > 1:
             # If we have more than 1 potential title, we need to disambiguate
             # TODO expand disambiguation
-            return self.goose.disambiguationDialogue().format( ','.join([self.title_text(i) for i in title_list]))
-        elif (len(title_list) == 0):
-            possible_title = self.find_movies_closest_to_title(titles[0])
-            if len(possible_title) == 0:
+            title_list = self.disambiguate(title_list)
+        elif len(title_list) == 0:
+            possible_titles = self.find_movies_closest_to_title(titles[0])
+            if len(possible_titles) == 0:
                 return self.goose.noTitlesIdentified()
-            return self.goose.misspelled().format( ','.join([self.title_text(i) for i in possible_title]))
-
+            else:
+                title_list = self.disambiguate(possible_titles, True)
 
         if self.creative:
             response = "I processed {} in creative mode!!".format(line)
