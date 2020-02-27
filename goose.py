@@ -71,4 +71,5 @@ class Goose:
             " What else HONK!"
             ]
         return random.choice(rec_followup)
-
+    def unknownSentiment(self):
+        return "AHHHHHHH"
