@@ -7,11 +7,8 @@ import nltk
 import numpy as np
 import re
 import random as r
-<<<<<<< HEAD
 from PorterStemmer import PorterStemmer
-=======
 from goose import Goose
->>>>>>> 61e56adbe026693001cc7d1d20ca905810342d93
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -379,7 +376,7 @@ class Chatbot:
         :returns: a numerical value for the sentiment of the text
         """
         no_titles = self.removed_titles(preprocessed_input)
-        preprocessed_input = self.get_stemmed(no_titles)
+        preprocessed_input = self.get_stemmed(no_titles).split()
         
         NEGATION = r"""
         (?:
