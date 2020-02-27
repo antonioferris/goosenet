@@ -149,6 +149,10 @@ def test_extract_sentiment():
         chatbot.extract_sentiment(chatbot.preprocess("I didn't enjoy \"Titanic (1997)\".")),
         -1,
         "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't enjoy  \"Titanic (1997)\"\'.))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I liked 10 Things I Hate About You.")),
+            1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I liked \"10 Things I Hate About You\"\'))"
     ):
         print('extract_sentiment() sanity check passed!')
     print()
