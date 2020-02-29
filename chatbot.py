@@ -151,9 +151,6 @@ class Chatbot:
         if len(title_list) == 1:
             return self.update_with_preferences(title_list)
         elif len(title_list) == 0:
-            if len(prev_title_list) != 0:
-                self.params = {'title_list' : prev_title_list}
-                return self.goose.
             self.params = {'title_list' : title_list}
             self.curr_func = self.acquire_movie_preferences
             return self.goose.failedDisambiguationDialogue()
@@ -237,6 +234,7 @@ class Chatbot:
         # possibly calling other functions. Although modular code is not graded,    #
         # it is highly recommended.                                                 #
         #############################################################################
+        self.goose.prev_line = line
         self.params['line'] = line
         response = self.curr_func(**self.params)
         return response
