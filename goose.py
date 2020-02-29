@@ -40,9 +40,9 @@ class Goose:
 
     def disambiguationDialogue(self, misspelled):
         if misspelled:
-            return " HONK!" * honk_num, " I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
+            return " HONK! I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
         else:
-            return "HONK! " * honk_num, " What movie are you referring to?  Please clarify, because you might have meant any of:\n{}"
+            return "HONK! What movie are you referring to?  Please clarify, because you might have meant any of:\n{}"
 
     def indexDisambiguationDialogue(self):
         return "Well now you've done it. You need to be actually specific. Please just type the number of the movie you want\n{}"
@@ -72,14 +72,14 @@ class Goose:
                  "HONK! Consider watching {}, you might like it",
                  "{} is NOT my cup of tea but it might fir your terrible taste. HONK!",
                  "HONK! Consider watching {}, you might like it" ]
-        return random.choice(rec) + (self.recommendationApprovalDialogue(False)) + random.choice(self.goose_emotion_response[self.goose_emotion]) 
+        return random.choice(rec) + (self.recommendationApprovalDialogue(False))# + random.choice(self.goose_emotion_response[self.goose_emotion]) 
 
 
     def recommendationApprovalDialogue(self, first_time):
         if first_time:
-            return "Would you like me to recomend you a movie?"
+            return " Would you like me to recomend you a movie?"
         else:
-            return "Would you like me to recomend you another movie?"
+            return " Would you like me to recomend you another movie?"
 
     def postRecommendationDialogue(self, used):
         if used:
@@ -98,7 +98,7 @@ class Goose:
         positive_rec = [
         " HONK! HONK! I am glad you liked {}.", 
         " HONK I liked {} too. ", 
-        "HONK {}. is pretty good. "
+        "HONK {}. is pretty good. ",
         "its not as good as Father Goose but {} is ok"
         ]
         return random.choice(positive_rec) #+ random.choice(self.goose_emotion_response[self.goose_emotion])
