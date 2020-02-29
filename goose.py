@@ -14,7 +14,9 @@ class Goose:
 
         self.goose_emotion = ""
         self.honk_num = 1
+        self.prev_line = ""
         #favorite goose movies
+        # these need to be formated like that acutal movies still
         self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies"]
 
 
@@ -37,6 +39,29 @@ class Goose:
         ]
         self.goose_emotion_response["dictator"] =  [
         ]
+
+    def question_process(self, line, tagged_tokens):
+        subjects = self.get_subjects(tagged_tokens)
+        return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
+        
+    def get_subjects(self, line):
+        """
+        Returns a list of subjects detected in a sentence or an empty list if none
+        """
+        
+        words = [ i[0] for i in line if 'N' in i[1]] 
+        return words
+
+    def noTitlesIdentified(self, line):
+
+        return ""
+
+    def goose_fav_movie(self, movie):
+        response = ["I love " + movie +". It is one of my favorites!",
+        "Great movie taste."
+
+        ]
+        return random.choice(response) + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
 
     def isNegativeResponse(self, user_input):
         return 'no' == user_input.lower()
@@ -75,12 +100,11 @@ class Goose:
 
         return random.choice(responses) + random.choice(self.goose_emotion_response[self.goose_emotion])
 
-    def noTitlesIdentified(self):
-        return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
+
 
     def recommendationDialogue(self):
         rec = [
-                 " I think you would like {}",
+                 " I think you would " + random.choice(self.pos_words) + " {}",
                  " Have you considered {}",
                  " Have you heard of {}",
                  " {} is NOT my cup of tea but it might fit your terrible taste. HONK!",
@@ -128,7 +152,7 @@ class Goose:
             " HONK {} was a pretty bad movie",
             " So you didnt really enjoy {} HONK.",
             " So you " + random.choice(self.neg_words) + " {}. ",
-            " Fascinating, I will add {} to list of movies I should check out"
+            " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good"
             " "
             
             ]
