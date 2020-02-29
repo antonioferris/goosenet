@@ -9,6 +9,8 @@ class Goose:
         self.state = 'GATHERING'
         self.times = 0
         self.QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
+        self.neg_words = ["hate", "dislike", "don't enjoy", "really really dislike"]
+        self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love", ""]
 
         self.goose_emotion = ""
         self.honk_num = 1
@@ -73,10 +75,10 @@ class Goose:
                  " Have you considered {}",
                  " Have you heard of {}",
                  " {} is NOT my cup of tea but it might fit your terrible taste. HONK!",
-                 " HONK! Consider watching {}, you might like it"]
+                 " HONK!" * self.honk_num + " Consider watching {}, you might like it"]
 
         return random.choice(rec) + (self.recommendationApprovalDialogue(False))# + random.choice(self.goose_emotion_response[self.goose_emotion]) 
-
+ 
 
     def recommendationApprovalDialogue(self, first_time):
         if first_time:
@@ -88,11 +90,11 @@ class Goose:
         if used:
             return "Hope you enjoyed these recommendations!" + random.choice(self.goose_emotion_response[self.goose_emotion])
         else:
-            return "HONK!  What was the point of you asking about the movies then!" + random.choice(self.goose_emotion_response[self.goose_emotion])
+            return "HONK! " * self.honk_num + " What was the point of you asking about the movies then!" + random.choice(self.goose_emotion_response[self.goose_emotion])
 
     def askedFor20MoviesDialogue(self):
         return """Were the 20 movies I gave you not enough? Like we all know you have NOT watched all those movies yet. HONK!HONK!
-        Now for the movies you have seen before you can tell me know what you thought about then and I can probably reccomend more.
+        Now for the movies you have seen before you can tell me know what you thought about them and I can probably reccomend more.
         Probably, I mean those were like the best ones too. Your loss. HONK!
          """
     #dialouge for when the user gives a movie with positive sentiment
@@ -101,18 +103,24 @@ class Goose:
         positive_rec = [
         " HONK! HONK! I am glad you liked {}.", 
         " HONK I liked {} too. ", 
-        "HONK {}. is pretty good. ",
-        "its not as good as Father Goose but {} is ok"
+        " HONK {} is pretty good. ",
+        " its not as good as Father Goose but {} is ok",
+        " GOOSENET aproves of {}. HONK!",
+        " {} is a good movie. But do you like" + random.choice(self.goose_movies) + " Cause its one of my favorite movies",
+        " So you " + random.choice(self.pos_words) + " {}. "
         ]
         return random.choice(positive_rec) + self.sentimentFollowUp() #+ random.choice(self.goose_emotion_response[self.goose_emotion])
     # can add in advanced dialogue options based on line processing like ELIZA
     def negativeSentiment(self):
         negative_rec = [
-            "I am sorry HONK! that HONK! you didnt like {}. " ,
-            "HONK! agree to disagree about {}. HONK! ",
-            "HONK {} was a pretty bad movie",
-            "So you didnt really enjoy {} HONK."
-            "" # not sure about this one
+            " I am sorry HONK! that HONK! you didnt like {}. " ,
+            " HONK! agree to disagree about {}. HONK! ",
+            " HONK {} was a pretty bad movie",
+            " So you didnt really enjoy {} HONK.",
+            " So you " + random.choice(self.neg_words) + " {}. ",
+            " Fascinating, I will add {} to list of movies I should check out"
+            " "
+            
             ]
         return random.choice(negative_rec) + self.sentimentFollowUp()           
     def sentimentFollowUp(self):
