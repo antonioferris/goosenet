@@ -204,7 +204,9 @@ class Chatbot:
             if len(possible_titles) == 0:
                 return self.goose.noTitlesIdentified()
             else:
-                title_list = self.disambiguate_flow(possible_titles, True)
+                self.params = {'title_list' : title_list, 'misspelled' : True}
+                self.curr_func = self.disambiguate_flow
+                return self.goose.disambiguationDialogue(True).format('\n'.join([self.title_text(i) for i in title_list]))
         return self.update_with_preferences(title_list)
 
     def process(self, line):
