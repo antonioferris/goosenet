@@ -64,13 +64,16 @@ class Goose:
         return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
 
     def recommendationDialogue(self):
-            rec = [
+        rec = [
                  " I think you would like {}",
                  " Have you considered {}",
                  "Have you heard of {}",
                  "{} is NOT my cup of tea but it might fit your terrible taste. HONK!",
+                 "HONK! Consider watching {}, you might like it",
+                 "{} is NOT my cup of tea but it might fir your terrible taste. HONK!",
                  "HONK! Consider watching {}, you might like it" ]
-            return random.choice(rec) + (self.recommendationApprovalDialogue(False)) + random.choice(self.goose_emotion_response[self.goose_emotion]) 
+        return random.choice(rec) + (self.recommendationApprovalDialogue(False)) + random.choice(self.goose_emotion_response[self.goose_emotion]) 
+
 
     def recommendationApprovalDialogue(self, first_time):
         if first_time:

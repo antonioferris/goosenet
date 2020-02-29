@@ -7,7 +7,19 @@ import nltk
 import numpy as np
 import re
 import random as r
+from PorterStemmer import PorterStemmer
 from goose import Goose
+import inspect
+
+def dump_args(func):
+    """Decorator to print function call details - parameters names and effective values.
+    """
+    def wrapper(*args, **kwargs):
+        func_args = inspect.signature(func).bind(*args, **kwargs).arguments
+        func_args_str =  ', '.join('{} = {!r}'.format(*item) for item in func_args.items())
+        print(f'{func.__module__}.{func.__qualname__} ( {func_args_str} )')
+        return func(*args, **kwargs)
+    return wrapper
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -34,6 +46,7 @@ class Chatbot:
         self.vec = np.zeros(len(self.titles))
         #keeps track of how long user has talked to goosenet
         self.times = 0
+        self.i = 0
 
         #############################################################################
         # TODO: Binarize the movie ratings matrix.                                  #
@@ -113,30 +126,33 @@ class Chatbot:
         return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
     def recommendation_dialogue(self, line, rec, i):
-        # First, we ask if they want any recommendations
-        line = input(self.goose.recommendationApprovalDialogue(first_time=True))
-        # We use the user vec to recommend 20 movies to them
-        rec =  self.recommend(self.vec, self.binarized_ratings, k=20)
-        i = 0
-        
-        # While we still have an affirmation to continue we give them recommendations!
-        while self.goose.isAffirmativeResponse(line):
-            i += 1
+        # First, we check if the user wanted another recommendation!
+        if not self.goose.isAffirmativeResponse(line):
+            self.curr_func = self.post_recommend
+            self.params = {}
+            response = "The Goosenet must move on to more important matters"
+        else:
             if i >= 20:
-                return self.goose.askedFor20MoviesDialogue()
-            print(self.goose.recommendationDialogue().format(self.title_text(rec[i])))
-            line = input(self.goose.recommendationApprovalDialogue(first_time=False))
-
-            #print("AFTER RECOMMENDING", reccomendations)
-        # If i > 0, they did use our goosenet to get a recommendation.  Otherwise, they didn't
-        return self.goose.postRecommendationDialogue(i > 0)
+                self.curr_func = self.post_recommend
+                self.params = {}
+                response = self.goose.askedFor20MoviesDialogue()
+            else:
+                response = self.goose.recommendationDialogue().format(self.title_text(rec[i]))
+                self.params['i'] += 1
+        return response
+        
+        
         
     def disambiguate_dialogue(self, title_list, line, misspelled=False):
         clarification = line
         title_list = self.disambiguate(clarification, title_list)
         # If we are done, we go back to the get movie preferences function
         if len(title_list) == 1:
-            self.acquire_movie_preferences(self, title_list, line=None)
+            return self.update_with_preferences(title_list)
+        elif len(title_list) == 0:
+            self.params = {'title_list' : title_list}
+            self.curr_func = self.acquire_movie_preferences
+            return self.goose.failedDisambiguationDialogue()
         else:
             self.params['title_list'] = title_list
             return self.goose.disambiguationDialogue().format( '\n'.join([self.title_text(i) for i in title_list]))
@@ -151,11 +167,33 @@ class Chatbot:
         #         return None
         #     title_list = [title_list[idx]]
 
-    def acquire_movie_preferences(self, line, title_list = None):
+    def update_with_preferences(self, title_list):
+        sentiment = self.sentiment_rating
+        if sentiment > 0:
+            # need to implement some sort of caching here.
+            response = self.goose.positiveSentiment().format(self.title_text(title_list[0]))
+            self.times += 1
+        elif sentiment < 0:
+            response = self.goose.negativeSentiment().format(self.title_text(title_list[0]))
+            self.times += 1
+        else:
+            response = self.goose.unknownSentiment().format(self.title_text(title_list[0]))
+        self.vec[title_list[0]] = sentiment
+        if self.times >= 5:
+            rec = self.recommend(self.vec, self.binarized_ratings, k=20)
+            self.params = {'i' : 0, 'rec' : rec}
+            self.curr_func = self.recommendation_dialogue
+            response = self.goose.recommendationApprovalDialogue(first_time=True)
+        return response
+
+    def post_recommend(self, line):
+        return "The Goose is done with you!  Take the hint and HONK! get lost."
+
+    def acquire_movie_preferences(self, line = None, title_list = None):
         # First, we try to see if the user is trying to tell us their opinions on a movie
         # If title_list is None, we should be looking for a new title
         if not title_list:
-            sentiment = self.extract_sentiment(line)
+            self.sentiment_rating = self.extract_sentiment(line)
             titles = self.extract_titles(line)
             if not titles:
                 # If we found no titles, we go to a general dialogue
@@ -175,23 +213,7 @@ class Chatbot:
             #     return self.goose.noTitlesIdentified()
             # else:
             #     title_list = self.disambiguate_dialogue(possible_titles, True)
-        
-        followup = self.goose.positiveSentiment()
-        print('sent:', sentiment)
-        if sentiment > 0:
-            # need to implement some sort of caching here.
-            response = self.goose.positiveSentiment().format(titles[0]) +  followup
-            self.times += 1
-        elif sentiment < 0:
-            response = self.goose.negativeSentiment().format(titles[0]) + followup
-            self.times += 1
-        else:
-            response = self.goose.unknownSentiment().format(titles[0])
-        self.vec[title_list[0]] = sentiment
-        if self.times >= 5:
-            self.curr_func = self.recommendation_dialogue
-            response = self.recommendation_dialogue
-        return response
+        return self.update_with_preferences(title_list)
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -269,7 +291,7 @@ class Chatbot:
         :returns: list of movie titles that are potentially in the text
         """
         titles = []
-        title_pat = re.compile('"(.+)"')
+        title_pat = re.compile('"([^"]+)"')
         matches = title_pat.findall(preprocessed_input)
         titles.extend(matches)
         return titles
@@ -326,6 +348,33 @@ class Chatbot:
         
         return r
 
+    def get_stemmed(self, preprocessed_input):
+        """
+        Stems the string and returns it stemmed
+        """
+        p = PorterStemmer()
+        output, word = '', ''
+        for c in preprocessed_input:
+            if c.isalpha():
+                word += c.lower()
+            else:
+                if word:
+                    output += p.stem(word, 0,len(word)-1)
+                    word = ''
+                output += c.lower()
+        return output
+
+    def removed_titles(self, preprocessed_input):
+        """
+        Removes the movie titles from the string.
+        Also removes the last period.
+        """
+        titles = self.extract_titles(preprocessed_input)
+        for title in titles:
+            preprocessed_input = preprocessed_input.replace(title, '')
+            preprocessed_input = preprocessed_input.replace("\"", '').strip('.')
+        return preprocessed_input
+
     def extract_sentiment(self, preprocessed_input):
         """Extract a sentiment rating from a line of pre-processed text.
 
@@ -343,7 +392,9 @@ class Chatbot:
         :param preprocessed_input: a user-supplied line of text that has been pre-processed with preprocess()
         :returns: a numerical value for the sentiment of the text
         """
-        preprocessed_input = preprocessed_input.lower().replace("'", "").split()
+        no_titles = self.removed_titles(preprocessed_input)
+        preprocessed_input = self.get_stemmed(no_titles).split()
+        
         NEGATION = r"""
         (?:
             ^(?:never|no|nothing|nowhere|noone|none|not|
@@ -397,6 +448,22 @@ class Chatbot:
         
         return previous_row[-1]
     
+    def get_previous_sentiment(self, pieces, i):
+        """
+        Recursively finds the move sentiment for a certain film by looking at the sentiment
+        of the previous phrase. For example: "I liked both "I, Robot" and "Ex Machina"."
+        After extract_sentiment_for_movies splits this into pieces, we would find the
+        sentiment for "I, Robot" to be 1 and since "Ex Machina" would have a sentiment of
+        0, we want to map the same sentiment from the first movie onto the second.
+        """
+        sentiment = self.extract_sentiment(pieces[i])
+        if sentiment != 0:
+            return sentiment
+        elif sentiment == 0 and "not" in pieces[i]:
+            return -get_previous_sentiment(sentiment, i - 1)
+        else:
+            return get_previous_sentiment(sentiment, i - 1)
+
     def extract_sentiment_for_movies(self, preprocessed_input):
         """Creative Feature: Extracts the sentiments from a line of pre-processed text
         that may contain multiple movies. Note that the sentiments toward
@@ -418,11 +485,13 @@ class Chatbot:
         conj_pat = re.compile('".+"(.and |.but |.for |.nor |.or |.so |.yet )".+"')
         match = conj_pat.findall(preprocessed_input)
         pieces = preprocessed_input.split(match[0]) #split on the first conjunction
-        for sentence_piece in pieces:
-            piece_sentiment = self.extract_sentiment(sentence_piece)
-            result.append(("movie here", piece_sentiment))
 
-        print(result)
+        titles = self.extract_titles(preprocessed_input)
+        for i in range(len(pieces)):
+            sentiment = self.extract_sentiment(pieces[i])
+            if sentiment == 0: #if no sentiment :/
+                sentiment = get_previous_sentiment()
+            result.append((titles[i], sentiment))
         return result
 
     def find_movies_closest_to_title(self, title, max_distance=3):
@@ -568,6 +637,8 @@ class Chatbot:
         dot_product = np.dot(u, v)
         norm1 = np.linalg.norm(u)
         norm2 = np.linalg.norm(v)
+        if norm1 == 0 or norm2 == 0:
+            return 0
         similarity = dot_product / (norm1 * norm2)
         #############################################################################
         #                             END OF YOUR CODE                              #
