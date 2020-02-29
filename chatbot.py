@@ -46,6 +46,7 @@ class Chatbot:
         self.vec = np.zeros(len(self.titles))
         #keeps track of how long user has talked to goosenet
         self.times = 0
+        self.i = 0
 
         #############################################################################
         # TODO: Binarize the movie ratings matrix.                                  #
@@ -125,23 +126,22 @@ class Chatbot:
         return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
     def recommendation_dialogue(self, line, rec, i):
-        # First, we ask if they want any recommendations
-        line = input(self.goose.recommendationApprovalDialogue(first_time=True))
-        # We use the user vec to recommend 20 movies to them
-        rec =  self.recommend(self.vec, self.binarized_ratings, k=20)
-        i = 0
-        
-        # While we still have an affirmation to continue we give them recommendations!
-        while self.goose.isAffirmativeResponse(line):
-            i += 1
+        # First, we check if the user wanted another recommendation!
+        if not self.goose.isAffirmativeResponse(line):
+            self.curr_func = self.post_recommend
+            self.params = {}
+            response = "The Goosenet must move on to more important matters"
+        else:
             if i >= 20:
-                return self.goose.askedFor20MoviesDialogue()
-            print(self.goose.recommendationDialogue().format(self.title_text(rec[i])))
-            line = input(self.goose.recommendationApprovalDialogue(first_time=False))
-
-            #print("AFTER RECOMMENDING", reccomendations)
-        # If i > 0, they did use our goosenet to get a recommendation.  Otherwise, they didn't
-        return self.goose.postRecommendationDialogue(i > 0)
+                self.curr_func = self.post_recommend
+                self.params = {}
+                response = self.goose.askedFor20MoviesDialogue()
+            else:
+                response = self.goose.recommendationDialogue().format(self.title_text(rec[i]))
+                self.params['i'] += 1
+        return response
+        
+        
         
     def disambiguate_dialogue(self, title_list, line, misspelled=False):
         clarification = line
@@ -181,9 +181,14 @@ class Chatbot:
             response = self.goose.unknownSentiment().format(self.title_text(title_list[0]))
         self.vec[title_list[0]] = sentiment
         if self.times >= 5:
+            rec = self.recommend(self.vec, self.binarized_ratings, k=20)
+            self.params = {'i' : 0, 'rec' : rec}
             self.curr_func = self.recommendation_dialogue
-            response = self.recommendation_dialogue
+            response = self.goose.recommendationApprovalDialogue(first_time=True)
         return response
+
+    def post_recommend(self, line):
+        return "The Goose is done with you!  Take the hint and HONK! get lost."
 
     @dump_args
     def acquire_movie_preferences(self, line = None, title_list = None):
