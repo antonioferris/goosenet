@@ -165,6 +165,18 @@ def test_extract_sentiment():
             chatbot.extract_sentiment(chatbot.preprocess("I liked \"Easy A\".")),
             1,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I liked \"Easy A\"\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("\"Easy A\" I hate.")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'\"Easy A\" I hate.\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I hated \"Easy A\".")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I hated \"Easy A\".\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("This movie, \"Easy A\", is really bad.")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'This movie, \"Easy A\", is really bad.\'))"
     ):
         print('extract_sentiment() sanity check passed!')
     print()

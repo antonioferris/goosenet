@@ -346,6 +346,7 @@ class Chatbot:
         """
         Stems the string and returns it stemmed
         """
+        preprocessed_input += " lots" #this is jank but
         p = PorterStemmer()
         output, word = '', ''
         for c in preprocessed_input:
@@ -356,6 +357,8 @@ class Chatbot:
                     output += p.stem(word, 0,len(word)-1)
                     word = ''
                 output += c.lower()
+
+        print("output be: " + output)
         return output
 
     def removed_titles(self, preprocessed_input):
@@ -387,7 +390,11 @@ class Chatbot:
         :returns: a numerical value for the sentiment of the text
         """
         no_titles = self.removed_titles(preprocessed_input)
+        print("no_titles:")
+        print(no_titles)
         preprocessed_input = self.get_stemmed(no_titles).split()
+        print("preprocessed_input:")
+        print(preprocessed_input)
         
         NEGATION = r"""
         (?:
