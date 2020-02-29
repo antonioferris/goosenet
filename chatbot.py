@@ -169,7 +169,6 @@ class Chatbot:
 
     def update_with_preferences(self, title_list):
         sentiment = self.sentiment_rating
-        print('sent:', sentiment)
         if sentiment > 0:
             # need to implement some sort of caching here.
             response = self.goose.positiveSentiment().format(self.title_text(title_list[0]))
@@ -190,7 +189,6 @@ class Chatbot:
     def post_recommend(self, line):
         return "The Goose is done with you!  Take the hint and HONK! get lost."
 
-    @dump_args
     def acquire_movie_preferences(self, line = None, title_list = None):
         # First, we try to see if the user is trying to tell us their opinions on a movie
         # If title_list is None, we should be looking for a new title
@@ -354,7 +352,6 @@ class Chatbot:
         """
         Stems the string and returns it stemmed
         """
-        print("UNSTEMMED: " + preprocessed_input)
         p = PorterStemmer()
         output, word = '', ''
         for c in preprocessed_input:
@@ -365,7 +362,6 @@ class Chatbot:
                     output += p.stem(word, 0,len(word)-1)
                     word = ''
                 output += c.lower()
-        print("STEMMED: " + output)
         return output
 
     def removed_titles(self, preprocessed_input):
@@ -375,10 +371,8 @@ class Chatbot:
         """
         titles = self.extract_titles(preprocessed_input)
         for title in titles:
-            print(title)
             preprocessed_input = preprocessed_input.replace(title, '')
             preprocessed_input = preprocessed_input.replace("\"", '').strip('.')
-        print(preprocessed_input)
         return preprocessed_input
 
     def extract_sentiment(self, preprocessed_input):
@@ -493,15 +487,11 @@ class Chatbot:
         pieces = preprocessed_input.split(match[0]) #split on the first conjunction
 
         titles = self.extract_titles(preprocessed_input)
-        print(titles)
         for i in range(len(pieces)):
-            print(i)
             sentiment = self.extract_sentiment(pieces[i])
             if sentiment == 0: #if no sentiment :/
                 sentiment = get_previous_sentiment()
             result.append((titles[i], sentiment))
-
-        print(result)
         return result
 
     def find_movies_closest_to_title(self, title, max_distance=3):
@@ -647,6 +637,8 @@ class Chatbot:
         dot_product = np.dot(u, v)
         norm1 = np.linalg.norm(u)
         norm2 = np.linalg.norm(v)
+        if norm1 == 0 or norm2 == 0:
+            return 0
         similarity = dot_product / (norm1 * norm2)
         #############################################################################
         #                             END OF YOUR CODE                              #
