@@ -156,16 +156,6 @@ class Chatbot:
         else:
             self.params = {'title_list' : title_list, 'misspelled' : misspelled}
             return self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list]))
-        # # If they over-clarified and we have none left we just ask them for the index they want point blank
-        # if len(title_list_temp) == 0:
-        #     # This string is formatted with indexes in the array of each movie as well
-        #     return self.goose.indexDisambiguationDialogue().format('\n'.join([str(i) + '. ' + self.title_text(i) for i in title_list]))
-        #     s = input(index_dialogue)
-        #     try:
-        #         idx = int(input(index_dialogue))
-        #     except ValueError:
-        #         return None
-        #     title_list = [title_list[idx]]
 
     def update_with_preferences(self, title_list):
         sentiment = self.sentiment_rating
@@ -210,12 +200,11 @@ class Chatbot:
             self.curr_func = self.disambiguate_flow
             return self.goose.disambiguationDialogue(False).format('\n'.join([self.title_text(i) for i in title_list]))
         elif len(title_list) == 0:
-            return self.goose.noTitlesIdentified()
-            # possible_titles = self.find_movies_closest_to_title(titles[0])
-            # if len(possible_titles) == 0:
-            #     return self.goose.noTitlesIdentified()
-            # else:
-            #     title_list = self.disambiguate_flow(possible_titles, True)
+            possible_titles = self.find_movies_closest_to_title(titles[0])
+            if len(possible_titles) == 0:
+                return self.goose.noTitlesIdentified()
+            else:
+                title_list = self.disambiguate_flow(possible_titles, True)
         return self.update_with_preferences(title_list)
 
     def process(self, line):
