@@ -145,11 +145,15 @@ class Chatbot:
         
     def disambiguate_flow(self, title_list, line, misspelled=False):
         clarification = line
+        prev_title_list = title_list
         title_list = self.disambiguate(clarification, title_list)
         # If we are done, we go back to the get movie preferences function
         if len(title_list) == 1:
             return self.update_with_preferences(title_list)
         elif len(title_list) == 0:
+            if len(prev_title_list) != 0:
+                self.params = {'title_list' : prev_title_list}
+                return self.goose.
             self.params = {'title_list' : title_list}
             self.curr_func = self.acquire_movie_preferences
             return self.goose.failedDisambiguationDialogue()
