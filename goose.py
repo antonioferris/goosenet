@@ -14,7 +14,9 @@ class Goose:
 
         self.goose_emotion = ""
         self.honk_num = 1
+        self.prev_line = ""
         #favorite goose movies
+        # these need to be formated like that acutal movies still
         self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies"]
 
 
@@ -37,9 +39,15 @@ class Goose:
         ]
         self.goose_emotion_response["dictator"] =  [
         ]
+    def goose_fav_movie(self, movie):
+        response = ["I love " + movie +". It is one of my favorites!",
+        "Great movie taste."
+
+        ]
+        return random.choice(response) + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
 
     def isNegativeResponse(self, user_input):
-        return 'n' in user_input.lower()
+        return 'no' == user_input.lower()
 
     def isAffirmativeResponse(self, user_input):
         return 'y' in user_input.lower()
@@ -75,7 +83,7 @@ class Goose:
 
     def recommendationDialogue(self):
         rec = [
-                 " I think you would like {}",
+                 " I think you would " + random.choice(self.pos_words) + " {}",
                  " Have you considered {}",
                  " Have you heard of {}",
                  " {} is NOT my cup of tea but it might fit your terrible taste. HONK!",
@@ -101,6 +109,7 @@ class Goose:
         Now for the movies you have seen before you can tell me know what you thought about them and I can probably reccomend more.
         Probably, I mean those were like the best ones too. Your loss. HONK!
          """
+
     #dialouge for when the user gives a movie with positive sentiment
     def positiveSentiment(self):
 
@@ -122,7 +131,7 @@ class Goose:
             " HONK {} was a pretty bad movie",
             " So you didnt really enjoy {} HONK.",
             " So you " + random.choice(self.neg_words) + " {}. ",
-            " Fascinating, I will add {} to list of movies I should check out"
+            " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good"
             " "
             
             ]
