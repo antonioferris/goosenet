@@ -47,7 +47,7 @@ class Goose:
         return random.choice(response) + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
 
     def isNegativeResponse(self, user_input):
-        return 'n' in user_input.lower()
+        return 'no' == user_input.lower()
 
     def isAffirmativeResponse(self, user_input):
         return 'y' in user_input.lower()
@@ -109,6 +109,7 @@ class Goose:
         Now for the movies you have seen before you can tell me know what you thought about them and I can probably reccomend more.
         Probably, I mean those were like the best ones too. Your loss. HONK!
          """
+
     #dialouge for when the user gives a movie with positive sentiment
     def positiveSentiment(self):
 

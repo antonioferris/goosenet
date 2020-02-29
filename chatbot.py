@@ -145,6 +145,7 @@ class Chatbot:
         
     def disambiguate_flow(self, title_list, line, misspelled=False):
         clarification = line
+        prev_title_list = title_list
         title_list = self.disambiguate(clarification, title_list)
         # If we are done, we go back to the get movie preferences function
         if len(title_list) == 1:
@@ -233,6 +234,7 @@ class Chatbot:
         # possibly calling other functions. Although modular code is not graded,    #
         # it is highly recommended.                                                 #
         #############################################################################
+        self.goose.prev_line = line
         self.params['line'] = line
         response = self.curr_func(**self.params)
         return response
