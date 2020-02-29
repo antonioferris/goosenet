@@ -125,7 +125,7 @@ class Chatbot:
         subjects = self.get_subjects(tagged_tokens)
         return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
-    def recommendation_dialogue(self, line, rec, i):
+    def recommendation_flow(self, line, rec, i):
         # First, we check if the user wanted another recommendation!
         if not self.goose.isAffirmativeResponse(line):
             self.curr_func = self.post_recommend
@@ -143,7 +143,7 @@ class Chatbot:
         
         
         
-    def disambiguate_dialogue(self, title_list, line, misspelled=False):
+    def disambiguate_flow(self, title_list, line, misspelled=False):
         clarification = line
         title_list = self.disambiguate(clarification, title_list)
         # If we are done, we go back to the get movie preferences function
@@ -154,8 +154,8 @@ class Chatbot:
             self.curr_func = self.acquire_movie_preferences
             return self.goose.failedDisambiguationDialogue()
         else:
-            self.params['title_list'] = title_list
-            return self.goose.disambiguationDialogue().format( '\n'.join([self.title_text(i) for i in title_list]))
+            self.params = {'title_list' : title_list, 'misspelled' : misspelled}
+            return self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list]))
         # # If they over-clarified and we have none left we just ask them for the index they want point blank
         # if len(title_list_temp) == 0:
         #     # This string is formatted with indexes in the array of each movie as well
@@ -182,12 +182,15 @@ class Chatbot:
         if self.times >= 5:
             rec = self.recommend(self.vec, self.binarized_ratings, k=20)
             self.params = {'i' : 0, 'rec' : rec}
-            self.curr_func = self.recommendation_dialogue
-            response = self.goose.recommendationApprovalDialogue(first_time=True)
+            self.curr_func = self.recommendation_flow
+            response += ' ' + self.goose.recommendationApprovalDialogue(first_time=True)
+        else:
+            self.params = {}
+            self.curr_func = self.acquire_movie_preferences
         return response
 
     def post_recommend(self, line):
-        return "The Goose is done with you!  Take the hint and HONK! get lost."
+        return self.goose.doneRecommendingDialogue()
 
     def acquire_movie_preferences(self, line = None, title_list = None):
         # First, we try to see if the user is trying to tell us their opinions on a movie
@@ -203,8 +206,8 @@ class Chatbot:
         # Otherwise, we already have a title_list and might be trying to disambiguate it
         if len(title_list) > 1:
             # If we have more than 1 potential title, we need to disambiguate
-            self.params = {'title_list' : title_list}
-            self.curr_func = self.disambiguate_dialogue
+            self.params = {'title_list' : title_list, 'misspelled' : False}
+            self.curr_func = self.disambiguate_flow
             return self.goose.disambiguationDialogue(False).format('\n'.join([self.title_text(i) for i in title_list]))
         elif len(title_list) == 0:
             return self.goose.noTitlesIdentified()
@@ -212,7 +215,7 @@ class Chatbot:
             # if len(possible_titles) == 0:
             #     return self.goose.noTitlesIdentified()
             # else:
-            #     title_list = self.disambiguate_dialogue(possible_titles, True)
+            #     title_list = self.disambiguate_flow(possible_titles, True)
         return self.update_with_preferences(title_list)
 
     def process(self, line):

@@ -69,9 +69,7 @@ class Goose:
                  " Have you considered {}",
                  "Have you heard of {}",
                  "{} is NOT my cup of tea but it might fit your terrible taste. HONK!",
-                 "HONK! Consider watching {}, you might like it",
-                 "{} is NOT my cup of tea but it might fir your terrible taste. HONK!",
-                 "HONK! Consider watching {}, you might like it" ]
+                 "HONK! Consider watching {}, you might like it"]
         return random.choice(rec) + (self.recommendationApprovalDialogue(False))# + random.choice(self.goose_emotion_response[self.goose_emotion]) 
 
 
@@ -131,3 +129,6 @@ class Goose:
         "HONK I need your emotions and feelings about {}"
         ]
         return "AHHHHHHH" + random.choice(self.goose_emotion_response[self.goose_emotion])
+
+    def doneRecommendingDialogue(self):
+        return "The Goose is done with you!  Take the hint and HONK! get lost."
