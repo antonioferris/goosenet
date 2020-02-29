@@ -134,3 +134,6 @@ class Goose:
         "HONK I need your emotions and feelings about {}"
         ]
         return "AHHHHHHH" + random.choice(self.goose_emotion_response[self.goose_emotion])
+
+    def doneRecommendingDialogue(self):
+        return "The Goose is done with you!  Take the hint and HONK! get lost."
