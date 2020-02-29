@@ -174,7 +174,7 @@ class Chatbot:
             rec = self.recommend(self.vec, self.binarized_ratings, k=20)
             self.params = {'i' : 0, 'rec' : rec}
             self.curr_func = self.recommendation_flow
-            response += ' ' + self.goose.recommendationApprovalDialogue(first_time=True)
+            response = self.goose.finalMovieDialogue() + ' ' + self.goose.recommendationApprovalDialogue(first_time=True)
         else:
             self.params = {}
             self.curr_func = self.acquire_movie_preferences
@@ -201,10 +201,10 @@ class Chatbot:
             self.curr_func = self.disambiguate_flow
             return self.goose.disambiguationDialogue(False).format('\n'.join([self.title_text(i) for i in title_list]))
         elif len(title_list) == 0:
-            possible_titles = self.find_movies_closest_to_title(titles[0])
-            if len(possible_titles) == 0:
+            title_list = self.find_movies_closest_to_title(titles[0])
+            if len(title_list) == 0:
                 return self.goose.noTitlesIdentified()
-            else:
+            elif len(title_list) > 1:
                 self.params = {'title_list' : title_list, 'misspelled' : True}
                 self.curr_func = self.disambiguate_flow
                 return self.goose.disambiguationDialogue(True).format('\n'.join([self.title_text(i) for i in title_list]))
