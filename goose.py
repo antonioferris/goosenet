@@ -20,7 +20,7 @@ class Goose:
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor
         # To any text    
-        self.goose_emotion_response = {"angry":[], "smug":[], "pleased":[], "Dictator":[], "" :[""] }
+        self.goose_emotion_response = {"angry":[], "smug":[], "pleased":[], "dictator":[], "" :[""] }
         self.goose_emotion_response["angry"] = [
         " HONK! I am losing my patience with you human.",
         " You have HONKIN bad taste puny human",
@@ -32,7 +32,11 @@ class Goose:
         "Dumb human, you know you could just go to netflix. But instead you grovel before me"
 
         ]
-
+        self.goose_emotion_response["pleased"] = [ 
+        "You know human, I might have to keep you alive when this is all over."
+        ]
+        self.goose_emotion_response["dictator"] =  [
+        ]
 
     def isNegativeResponse(self, user_input):
         return 'n' in user_input.lower()
