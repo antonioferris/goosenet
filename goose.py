@@ -20,13 +20,14 @@ class Goose:
         # To any text    
         self.goose_emotion_response = {"angry":[], "smug":[], "pleased":[], "Dictator":[], "" :[""] }
         self.goose_emotion_response["angry"] = [
-        "HONK! I am losing my patience with you human.",
-        "You have HONKIN bad taste puny human",
-         "HONK After seeing your personality I think you would love The Last Airbender. its a terrible movie just like you. HONK!",
-         "Are my world ending plans really worth talking to silly human like you"
-         "HONK HONK HONK LEAVE ME ALONE HONK"
+        " HONK! I am losing my patience with you human.",
+        " You have HONKIN bad taste puny human",
+        " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
+        " Are my world ending plans really worth talking to silly human like you",
+        " HONK HONK HONK LEAVE ME ALONE HONK"
         ]
         self.goose_emotion_response["smug"] = [
+        "Dumb human, you know you could just go to netflix. But instead you grovel before me"
 
         ]
 
@@ -45,7 +46,7 @@ class Goose:
         if misspelled:
             return " HONK!" * self.honk_num + " I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
         else:
-            return "HONK!" * self.honk_num + " What movie are you referring to?  Please clarify, because you might have meant any of:\n{}"
+            return "HONK!" * self.honk_num + " What movie are you referring to? Give me the year or some distinct part of the movie name. Please clarify, because you might have meant any of:\n{}"
 
     def indexDisambiguationDialogue(self):
         return "Well now you've done it. You need to be actually specific. Please just type the number of the movie you want\n{}"
@@ -70,9 +71,9 @@ class Goose:
         rec = [
                  " I think you would like {}",
                  " Have you considered {}",
-                 "Have you heard of {}",
-                 "{} is NOT my cup of tea but it might fit your terrible taste. HONK!",
-                 "HONK! Consider watching {}, you might like it"]
+                 " Have you heard of {}",
+                 " {} is NOT my cup of tea but it might fit your terrible taste. HONK!",
+                 " HONK! Consider watching {}, you might like it"]
 
         return random.choice(rec) + (self.recommendationApprovalDialogue(False))# + random.choice(self.goose_emotion_response[self.goose_emotion]) 
 
