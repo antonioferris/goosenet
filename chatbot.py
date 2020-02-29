@@ -203,7 +203,7 @@ class Chatbot:
         elif len(title_list) == 0:
             possible_titles = self.find_movies_closest_to_title(titles[0])
             if len(possible_titles) == 0:
-                return self.goose.noTitlesIdentified()
+                return self.goose.noTitlesIdentified(line)
             else:
                 self.params = {'title_list' : title_list, 'misspelled' : True}
                 self.curr_func = self.disambiguate_flow
