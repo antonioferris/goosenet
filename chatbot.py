@@ -182,6 +182,7 @@ class Chatbot:
         # First, we try to see if the user is trying to tell us their opinions on a movie
         # If title_list is None, we should be looking for a new title
         if not title_list:
+            line = line.strip(' ')
             self.sentiment_rating = self.extract_sentiment(line)
             titles = self.extract_titles(line)
             if not titles:
