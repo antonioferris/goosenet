@@ -66,8 +66,27 @@ class Chatbot:
         goose online....
 
 
-        HONK! I am goosenet! I am here to help you discover new movies in return for sensitive information about
-        US troop distributions and supply lines! I give you bonus recomendations for goose related things!
+                                                        _...--.
+                                        _____......----'     .'
+                                  _..-''                   .'
+                                .'                       ./
+                        _.--._.'                       .' |   __ _  ___   ___  ___  ___    
+                     .-'                           .-.'  /   / _` |/ _ \ / _ \/ __|/ _ \ 
+                   .'   _.-.                     .  \   '   | (_| | (_) | (_) \__ \  __/ 
+                 .'  .'   .'    _    .-.        / `./  :     \__, |\___/ \___/|___/\___|
+               .'  .'   .'  .--' `.  |  \  |`. |     .'       __/ |
+            _.'  .'   .' `.'       `-'   \ / |.'   .'        |___/      _           _
+         _.'  .-'   .'     `-.            `      .'                    | |__   ___ | |__
+       .'   .'    .'          `-.._ _ _ _ .-.    :                     | '_ \ / _ \|  __|
+      /    /o _.-'               .--'   .'   \   |                     | |_) | (_) | |_
+    .'-.__..-'                  /..    .`    / .'                      |_.__/ \___/ \__|
+  .'   . '                       /.'/.'     /  |
+ `---'                                   _.'   '
+                                       /.'    .'
+                                        /.'/.'
+
+
+        HONK! I am goosenet! I am here to help you discover new movies.
         Honk I am looking forward to destroying life.. er  I mean HONK! Tell me what movies you like!
         """
 
@@ -155,6 +174,9 @@ class Chatbot:
     def update_with_preferences(self, title_list):
         sentiment = self.sentiment_rating
         title_text = self.title_text(title_list[0])
+        #check for goose's favorite movies
+        #if [x for x in self.goose.goose_movies if x in title_text] and sentiment:
+        #    self.goose.goose_fav_movie(title_text, sentiment)
         if sentiment > 0:
             # need to implement some sort of caching here.
             response = self.goose.positiveSentiment().format(title_text)
@@ -773,7 +795,7 @@ class Goose:
         self.times = 0
         self.QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
         self.neg_words = ["hate", "dislike", "don't enjoy", "really really dislike"]
-        self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love", ""]
+        self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love"]
 
         self.goose_emotion = ""
         self.honk_num = 1
@@ -782,7 +804,7 @@ class Goose:
         # these need to be formated like that acutal movies still
 
         self.greeting_words = ["hello", "hi", "greetings", "howdy", "hey", "what's up"]
-        self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies", "Braveheart"]
+        self.goose_movies = ["Father Goose", "Terminator", "Alien", "Lord of the Flies", "Braveheart"]
         self.knowledge ={"name":"Reginald", "color":"blue", "movie": "Father Goose or the Terminator",
          "band":"Metallica", "music": "Goose Metal", "day": "pretty good", "you": "Eggcellent  "}
 
@@ -871,12 +893,16 @@ class Goose:
 
         return "HONK HONK TODO NO TITLES IDENTFIED"
 
-    def goose_fav_movie(self, movie):
-        response = ["I love " + movie +". It is one of my favorites!",
-        "Great movie taste."
+    def goose_fav_movie(self, movie, sentiment):
+        if sentiment > 0:
+            self.goose_emotion = "pleased"
+            response = ["I love " + movie +". It is one of my favorites!" "You have pleased me with your good taste"]
+        if sentiment < 0:
+            response = [ movie +" is one of my favorite movies. You have made me angry human"]
+            self.goose_emotion = "angry"
 
-        ]
-        return random.choice(response) + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
+        print(random.choice(response))
+        return random.choice(response)# + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
 
     def isNegativeResponse(self, user_input):
         return 'no' == user_input.lower()
@@ -949,12 +975,12 @@ class Goose:
     def positiveSentiment(self):
 
         positive_rec = [
-        " HONK! HONK! I am glad you liked {}.", 
+        " HONK! HONK! I am glad you liked {}. ", 
         " HONK I liked {} too. ", 
         " HONK {} is pretty good. ",
-        " its not as good as Father Goose but {} is ok",
-        " GOOSENET aproves of {}. HONK!",
-        " {} is a good movie. But do you like" + random.choice(self.goose_movies) + " Cause its one of my favorite movies",
+        " its not as good as Father Goose but {} is ok ",
+        " GOOSENET aproves of {}. HONK! ",
+        " {} is a good movie. But do you like " + random.choice(self.goose_movies) + " Cause its one of my favorite movies ",
         " So you " + random.choice(self.pos_words) + " {}. "
         ]
         return random.choice(positive_rec)
@@ -963,18 +989,18 @@ class Goose:
         negative_rec = [
             " I am sorry HONK! that HONK! you didnt like {}. " ,
             " HONK! agree to disagree about {}. HONK! ",
-            " HONK {} was a pretty bad movie",
-            " So you didnt really enjoy {} HONK.",
+            " HONK {} was a pretty bad movie ",
+            " So you didnt really enjoy {} HONK. ",
             " So you " + random.choice(self.neg_words) + " {}. ",
-            " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good"
+            " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good "
             ]
         return random.choice(negative_rec)        
     def sentimentFollowUp(self):
         rec_followup = [
-            " Anything else you want to tell me HONK! ? ", 
-            " What else? HONK!",
-            " What are some other movies you liked?",
-            " HONK! I need more recomendations to idenity humanities weak... I mean to help you find cool movies"
+            "Anything else you want to tell me HONK! ? ", 
+            "What else? HONK! ",
+            "What are some other movies you liked? ",
+            "HONK! I need more recomendations to idenity humanities weak... I mean to help you find cool movies "
 
             ]
         return random.choice(rec_followup) + random.choice(self.goose_emotion_response[self.goose_emotion])
@@ -987,7 +1013,7 @@ class Goose:
         "I didnt catch how you felt about {}",
         "HONK I need your emotions and feelings about {}"
         ]
-        return "AHHHHHHH" + random.choice(self.goose_emotion_response[self.goose_emotion])
+        return random.choice(unknown) #+ random.choice(self.goose_emotion_response[self.goose_emotion])
 
     def doneRecommendingDialogue(self):
         return "The Goose is done with you!  Take the hint and HONK! get lost."
