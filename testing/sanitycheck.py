@@ -197,6 +197,18 @@ def test_extract_sentiment_for_movies():
         "Incorrect output for test_extract_sentiment_for_movies("
         "chatbot.preprocess(\"I liked \"I, Robot\" but not \"Ex Machina\".))\"",
         orderMatters=False
+    ) and assertListEquals(
+        chatbot.extract_sentiment_for_movies(chatbot.preprocess("I liked \"I, Robot\", \"Ex Machina\", and \"Braveheart\".")),
+        [("I, Robot", 1), ("Ex Machina", 1), ("Braveheart", 1)],
+        "Incorrect output for test_extract_sentiment_for_movies("
+        "chatbot.preprocess(\"I liked \"I, Robot\", \"Ex Machina\", and \"Braveheart\".))\"",
+        orderMatters=False
+    ) and assertListEquals(
+        chatbot.extract_sentiment_for_movies(chatbot.preprocess("I hated \"I, Robot\", \"Ex Machina\", and \"Braveheart\".")),
+        [("I, Robot", -1), ("Ex Machina", -1), ("Braveheart", -1)],
+        "Incorrect output for test_extract_sentiment_for_movies("
+        "chatbot.preprocess(\"I hated \"I, Robot\", \"Ex Machina\", and \"Braveheart\".))\"",
+        orderMatters=False
     ):
         print('extract_sentiment_for_movies() sanity check passed!')
     print()
@@ -284,6 +296,9 @@ def main():
     testing_creative = args.creative
 
     test_extract_titles()
+
+    test_extract_sentiment_for_movies() ##deleteeeee
+
     test_find_movies_by_title()
     test_extract_sentiment()
     test_recommend()
