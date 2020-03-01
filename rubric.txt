@@ -63,7 +63,8 @@ The goose has a limited knowledge base about itself and can detect when the user
 The goose can respond what its name is. For example asking "What is your name" has the goose respond Well, my name is Reginald.
 It also detects when you are talking about it. If you say I hate you Goosenet! Goosenet will not be happy.
 It also will respond to basic greetings like hi! or hello!
-If the goose detects neagtive sentiment when it believes you talking about it. it will not be happy
+If the goose detects neagtive sentiment when it believes you talking about it. Or a subject it either cares about it will not be happy
+The goose also has some favorite movies, disliking movies like "Father Goose" will make the goose angry
 #########################################################################################
 
 

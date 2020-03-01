@@ -800,7 +800,7 @@ class Goose:
         self.neg_words = ["hate", "dislike", "don't enjoy", "really really dislike"]
         self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love"]
 
-        self.goose_emotion = ""
+        self.goose_emotion = 0
         self.honk_num = 1
         self.prev_line = ""
        
@@ -814,27 +814,11 @@ class Goose:
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor
         # To any text    
-        self.goose_emotion_response = {"angry":[], "smug":[], "pleased":[], "dictator":[], "" :[""] }
-        self.goose_emotion_response["angry"] = [
-        " HONK! I am losing my patience with you human.",
-        " You have HONKIN bad taste puny human",
-        " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
-        " Are my world ending plans really worth talking to silly human like you",
-        " HONK HONK HONK LEAVE ME ALONE HONK"
-        ]
-        self.goose_emotion_response["smug"] = [
-        "Dumb human, you know you could just go to netflix. But instead you grovel before me"
 
-        ]
-        self.goose_emotion_response["pleased"] = [ 
-        "You know human, I might have to keep you alive when this is all over."
-        ]
-        self.goose_emotion_response["dictator"] =  [
-        ]   
+
 
     def question_process(self, nouns, verbs, is_goose_subject):
         if is_goose_subject: # if they are asking about the goose
-            # can detenct sentiment here
             if ([x for x in nouns if x in self.knowledge]):
                 similarity = [x for x in nouns if x in self.knowledge]
                 return "Honk! Well my " + similarity[0] + " is " + self.knowledge[similarity[0]]
@@ -877,10 +861,10 @@ class Goose:
         sentiment = self.extract_sentiment(line)
         if is_goose_subject and sentiment:
             if sentiment == -1:
-                self.goose_emotion = "angry"
+                self.goose_emotion -= 1
                 return "Want to be mean to me? Buckle up ducko because HONK! I will be mad at you until you say something nice to me."
             else:
-                self.goose_emotion = "pleased"
+                self.goose_emotion += 1
                 return "I am amazing, am I not? When I am finished taking over the world I might need to keep you as a pet"
         # determine if what is being asked is a question
         if (text[0] in self.greeting_words):
@@ -898,14 +882,34 @@ class Goose:
 
     def goose_fav_movie(self, movie, sentiment):
         if sentiment > 0:
-            self.goose_emotion = "pleased"
+            self.goose_emotion += 1
             response = ["I love " + movie +". It is one of my favorites!" "You have pleased me with your good taste"]
         if sentiment < 0:
             response = [ movie +" is one of my favorite movies. You have made me angry human"]
-            self.goose_emotion = "angry"
+            self.goose_emotion -= 1
 
-        print(random.choice(response))
+        #print(random.choice(response))
         return random.choice(response)# + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
+
+    def goose_emotion_response(self, emotion):
+        goose_response = {-1:[], 1:[], 0 :[""]}
+        goose_response[-1] = [
+        " HONK! I am losing my patience with you human.",
+        " You have HONKIN bad taste puny human",
+        " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
+        " Are my world ending plans really worth talking to silly human like you",
+        " HONK HONK HONK LEAVE ME ALONE HONK"
+        ]
+
+        goose_response[1] = [ 
+        "You know human, I might have to keep you alive when this is all over."
+        ]
+        if emotion >  0:
+            return random.choice(goose_response[1])
+        elif emotion < 0:
+            return random.choice(goose_response[-1])
+        else:
+            return ""
 
     def isNegativeResponse(self, user_input):
         return 'no' == user_input.lower()
@@ -938,7 +942,7 @@ class Goose:
             #"OKAY LAST CHANCE HONK! "
         ]
 
-        return random.choice(responses) + random.choice(self.goose_emotion_response[self.goose_emotion])
+        return random.choice(responses) + goose_emotion_response(self.goose_emotion)
 
 
 
@@ -961,9 +965,9 @@ class Goose:
 
     def postRecommendationDialogue(self, used):
         if used:
-            return "Hope you enjoyed these recommendations!" + random.choice(self.goose_emotion_response[self.goose_emotion])
+            return "Hope you enjoyed these recommendations!" + goose_emotion_response[self.goose_emotion]
         else:
-            return "HONK! " * self.honk_num + " What was the point of you asking about the movies then!" + random.choice(self.goose_emotion_response[self.goose_emotion])
+            return "HONK! " * self.honk_num + " What was the point of you asking about the movies then!" + goose_emotion_response[self.goose_emotion]
 
     def askedFor20MoviesDialogue(self):
         return """Were the 20 movies I gave you not enough? Like we all know you have NOT watched all those movies yet. HONK!HONK!
@@ -1006,7 +1010,7 @@ class Goose:
             "HONK! I need more recomendations to idenity humanities weak... I mean to help you find cool movies "
 
             ]
-        return random.choice(rec_followup) + random.choice(self.goose_emotion_response[self.goose_emotion])
+        return random.choice(rec_followup) + goose_emotion_response[self.goose_emotion]
 
         # Could add a something that changes the state to something like the disambiguation.
         # To get more clairification about the movie that was already mentioned.
