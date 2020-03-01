@@ -78,7 +78,7 @@ class Goose:
         
 
         goose_pat = re.compile('goose | goosenet | goose bot | bot | you ')
-        is_goose_subject = bool([x if goose_pat.findall(x) for x in text ])
+        is_goose_subject = False#bool([x if (goose_pat.findall(x)) for x in text ])
 
 
 
