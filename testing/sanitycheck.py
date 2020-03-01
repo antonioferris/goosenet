@@ -306,9 +306,6 @@ def main():
     testing_creative = args.creative
 
     test_extract_titles()
-
-    test_extract_sentiment_for_movies() ##deleteeeee
-
     test_find_movies_by_title()
     test_extract_sentiment()
     test_recommend()

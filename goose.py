@@ -71,7 +71,7 @@ class Goose:
         print(tagged_tokens)
         subjects, verbs = self.get_subjects(tagged_tokens)
         if (not subjects):
-            return "speak with good sentences man"
+            return "speak with good sentences man... and tell me something relevant"
         main_subject = ""
         main_subject = subjects[0]
 
@@ -213,7 +213,7 @@ class Goose:
         "I didnt catch how you felt about {}",
         "HONK I need your emotions and feelings about {}"
         ]
-        return "AHHHHHHH" + random.choice(self.goose_emotion_response[self.goose_emotion])
+        return "AHHHHHHH you gotta tell me how you feel about the movie!" + random.choice(self.goose_emotion_response[self.goose_emotion])
 
     def doneRecommendingDialogue(self):
         return "The Goose is done with you!  Take the hint and HONK! get lost."
