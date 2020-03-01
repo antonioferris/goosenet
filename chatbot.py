@@ -8,6 +8,7 @@ import numpy as np
 import random
 import re
 import random as r
+import collections
 from PorterStemmer import PorterStemmer
 
 # noinspection PyMethodMayBeStatic
@@ -36,6 +37,7 @@ class Chatbot:
         #keeps track of how long user has talked to goosenet
         self.times = 0
         self.i = 0
+        self.goose.extract_sentiment = self.extract_sentiment
 
         #############################################################################
         # TODO: Binarize the movie ratings matrix.                                  #
@@ -64,8 +66,27 @@ class Chatbot:
         goose online....
 
 
-        HONK! I am goosenet! I am here to help you discover new movies in return for sensitive information about
-        US troop distributions and supply lines! I give you bonus recomendations for goose related things!
+                                                        _...--.
+                                        _____......----'     .'
+                                  _..-''                   .'
+                                .'                       ./
+                        _.--._.'                       .' |   __ _  ___   ___  ___  ___    
+                     .-'                           .-.'  /   / _` |/ _ \ / _ \/ __|/ _ \ 
+                   .'   _.-.                     .  \   '   | (_| | (_) | (_) \__ \  __/ 
+                 .'  .'   .'    _    .-.        / `./  :     \__, |\___/ \___/|___/\___|
+               .'  .'   .'  .--' `.  |  \  |`. |     .'       __/ |
+            _.'  .'   .' `.'       `-'   \ / |.'   .'        |___/      _           _
+         _.'  .-'   .'     `-.            `      .'                    | |__   ___ | |__
+       .'   .'    .'          `-.._ _ _ _ .-.    :                     | '_ \ / _ \|  __|
+      /    /o _.-'               .--'   .'   \   |                     | |_) | (_) | |_
+    .'-.__..-'                  /..    .`    / .'                      |_.__/ \___/ \__|
+  .'   . '                       /.'/.'     /  |
+ `---'                                   _.'   '
+                                       /.'    .'
+                                        /.'/.'
+
+
+        HONK! I am goosenet! I am here to help you discover new movies.
         Honk I am looking forward to destroying life.. er  I mean HONK! Tell me what movies you like!
         """
 
@@ -153,6 +174,9 @@ class Chatbot:
     def update_with_preferences(self, title_list):
         sentiment = self.sentiment_rating
         title_text = self.title_text(title_list[0])
+        #check for goose's favorite movies
+        #if [x for x in self.goose.goose_movies if x in title_text] and sentiment:
+        #    self.goose.goose_fav_movie(title_text, sentiment)
         if sentiment > 0:
             # need to implement some sort of caching here.
             response = self.goose.positiveSentiment().format(title_text)
@@ -180,6 +204,7 @@ class Chatbot:
         # First, we try to see if the user is trying to tell us their opinions on a movie
         # If title_list is None, we should be looking for a new title
         if not title_list:
+            line = line.strip(' ')
             self.sentiment_rating = self.extract_sentiment(line)
             titles = self.extract_titles(line)
             if not titles:
@@ -320,10 +345,10 @@ class Chatbot:
                 movie = a + ' ' + movie[:-len(a)-2]
             if title.endswith(', ' + a):
                 title = a + ' ' + title[:-len(a)-2]
-        if self.levenshtein(movie, title) <= edit_distance:
-            return True
+        if edit_distance > 0:
+            return self.levenshtein(movie, title)
         else:
-            return title in movie
+            return substring_match and title in movie
 
     def find_movies_by_title(self, title):
         """ Given a movie title, return a list of indices of matching movies.
@@ -344,11 +369,10 @@ class Chatbot:
         r = []
         for i in range(len(self.titles)):
             movie = self.titles[i][0]
-            if self.title_match(title.upper(), movie.upper()):
+            if self.title_match(title.upper(), movie.upper(), substring_match=True):
                 r.append(i)
             elif self.creative and self.title_match(title.upper(), movie.upper(), substring_match=True):
                 r.append(i)
-        
         return r
 
     def get_stemmed(self, preprocessed_input):
@@ -529,11 +553,16 @@ class Chatbot:
         :returns: a list of movie indices with titles closest to the given title and within edit distance max_distance
         """
         r = []
+        dists = collections.defaultdict(list)
         for i in range(len(self.titles)):
             movie = self.titles[i][0]
-            if self.title_match(title.upper(), movie.upper(), edit_distance=max_distance):
-                r.append(i)
-        return r
+            d = self.title_match(title.upper(), movie.upper(), edit_distance=max_distance)
+            if d <= max_distance:
+                dists[d].append(i)
+        for poss_dist in range(max_distance+1):
+            if dists[poss_dist]:
+                return dists[poss_dist]
+        return []
 
     def disambiguate(self, clarification, candidates):
         """Creative Feature: Given a list of movies that the user could be talking about
@@ -628,7 +657,9 @@ class Chatbot:
                 except (ValueError,TypeError) as e:
                     return -1
             # If we want the "newest" movie, we add the max year (newest) movie to filtered_candidates
-            filtered_candidates.append(max(candidates, key = lambda t : get_year(t)))
+            cand = max(candidates, key = lambda t : get_year(t))
+            if cand not in filtered_candidates:
+                filtered_candidates.append(cand)
 
         
         return filtered_candidates
@@ -773,49 +804,34 @@ class Goose:
         self.times = 0
         self.QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
         self.neg_words = ["hate", "dislike", "don't enjoy", "really really dislike"]
-        self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love", ""]
+        self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love"]
 
-        self.goose_emotion = ""
-        self.honk_num = 1
+        self.goose_emotion = 0
+        #self. -1 * self.goose_ = self.goose_emotion
         self.prev_line = ""
        
         # these need to be formated like that acutal movies still
 
         self.greeting_words = ["hello", "hi", "greetings", "howdy", "hey", "what's up"]
-        self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies", "Braveheart"]
-        self.knowledge ={"name":" reginald ", "color":"blue ", "movie": "Father Goose or the Terminator", "band":" metallica ", "music": " Goose Metal "}
+        self.goose_movies = ["Father Goose", "Terminator", "Alien", "Lord of the Flies", "Braveheart"]
+        self.knowledge ={"name":"Reginald", "color":"blue", "movie": "Father Goose or the Terminator",
+         "band":"Metallica", "music": "Goose Metal", "day": "pretty good", "you": "Eggcellent  "}
 
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor
         # To any text    
-        self.goose_emotion_response = {"angry":[], "smug":[], "pleased":[], "dictator":[], "" :[""] }
-        self.goose_emotion_response["angry"] = [
-        " HONK! I am losing my patience with you human.",
-        " You have HONKIN bad taste puny human",
-        " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
-        " Are my world ending plans really worth talking to silly human like you",
-        " HONK HONK HONK LEAVE ME ALONE HONK"
-        ]
-        self.goose_emotion_response["smug"] = [
-        "Dumb human, you know you could just go to netflix. But instead you grovel before me"
 
-        ]
-        self.goose_emotion_response["pleased"] = [ 
-        "You know human, I might have to keep you alive when this is all over."
-        ]
-        self.goose_emotion_response["dictator"] =  [
-        ]   
+
 
     def question_process(self, nouns, verbs, is_goose_subject):
         if is_goose_subject: # if they are asking about the goose
-            # can detenct sentiment here
             if ([x for x in nouns if x in self.knowledge]):
                 similarity = [x for x in nouns if x in self.knowledge]
                 return "Honk! Well my " + similarity[0] + " is " + self.knowledge[similarity[0]]
             else: 
-                return "I dont have knowledge about" + nouns[1] + "."
+                return "I dont have knowledge about " + nouns[0] + "."
            
-        return "Look I know a lot about the stuff you just asked but I will get to it."
+        return "Sorry until I consume more data its hard to answer other questions"
 
     def greeting_handling(self, nouns, verbs):
         return "Honk! " + random.choice(self.greeting_words) + "!"
@@ -827,7 +843,7 @@ class Goose:
         # should be list(tuple(str, str))
         #print(line[0]) 
 
-        nouns = [x for x, y in line if "NN" in y]
+        nouns = [x for x, y in line if "NN" or "PR" in y]
         verbs = [x for x, y in line if "V" in y]
         return nouns, verbs
 
@@ -838,21 +854,30 @@ class Goose:
         subjects, verbs = self.get_subjects(tagged_tokens)
         if (not subjects):
             return "speak with good sentences man"
-        main_subject = ""
+        
         main_subject = subjects[0]
 
         
 
-        goose_pat = re.compile('goose | goosenet | goose bot | bot | you | your ')
-        is_goose_subject = True#bool([x if (goose_pat.findall(x)) for x in text ])
-
-
-
+        goose_pat = re.compile('goose|goosenet|goose bot|bot|you|your')
+        is_goose_subject = bool([x for x in text if (goose_pat.findall(x)) ])
+        print ([x for x in text if (goose_pat.findall(x)) ])
+        print (is_goose_subject)
+        print( -1 * self.goose_emotion )
+        sentiment = self.extract_sentiment(line)
+        if is_goose_subject and sentiment:
+            if sentiment == -1:
+                self.goose_emotion -= 1
+                return "Want to be mean to me? Buckle up ducko because HONK! I will be mad at you until you say something nice to me."
+            else:
+                self.goose_emotion += 1
+                return "I am amazing, am I not? When I am finished taking over the world I might need to keep you as a pet"
         # determine if what is being asked is a question
-        if text[0] in self.QUESTION_WORDS:
-            return self.question_process(subjects, verbs, is_goose_subject)
         if (text[0] in self.greeting_words):
             return self.greeting_handling(subjects, verbs)
+        if text[0] in self.QUESTION_WORDS or text[1] in self.QUESTION_WORDS:
+            return self.question_process(subjects, verbs, is_goose_subject)
+
         
         
         return "temp so doesnt crash"
@@ -861,12 +886,36 @@ class Goose:
 
         return "HONK HONK TODO NO TITLES IDENTFIED"
 
-    def goose_fav_movie(self, movie):
-        response = ["I love " + movie +". It is one of my favorites!",
-        "Great movie taste."
+    def goose_fav_movie(self, movie, sentiment):
+        if sentiment > 0:
+            self.goose_emotion += 1
+            response = ["I love " + movie +". It is one of my favorites!" "You have pleased me with your good taste"]
+        if sentiment < 0:
+            response = [ movie +" is one of my favorite movies. You have made me angry human"]
+            self.goose_emotion -= 1
 
+        #print(random.choice(response))
+        return random.choice(response)# + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
+
+    def goose_emotion_response(self, emotion):
+        goose_response = {-1:[], 1:[], 0 :[""]}
+        goose_response[-1] = [
+        " HONK! I am losing my patience with you human.",
+        " You have HONKIN bad taste puny human",
+        " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
+        " Are my world ending plans really worth talking to silly human like you",
+        "HONK! " * (-1 * self.goose_emotion) + " LEAVE ME ALONE HONK"
         ]
-        return random.choice(response) + self.goose_emotion_response[self.goose_emotion] + self.sentimentFollowUp()
+
+        goose_response[1] = [ 
+        "You know human, I might have to keep you alive when this is all over."
+        ]
+        if emotion >  0:
+            return random.choice(goose_response[1])
+        elif emotion < 0:
+            return random.choice(goose_response[-1])
+        else:
+            return ""
 
     def isNegativeResponse(self, user_input):
         return 'no' == user_input.lower()
@@ -876,9 +925,9 @@ class Goose:
 
     def disambiguationDialogue(self, misspelled):
         if misspelled:
-            return " HONK!" * self.honk_num + " I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
+            return " HONK!" * (-1 * self.goose_emotion)  + " I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
         else:
-            return "HONK!" * self.honk_num + " What movie are you referring to? Give me the year or some distinct part of the movie name. Please clarify, because you might have meant any of:\n{}"
+            return "HONK!" *  (-1 * self.goose_emotion)  + " What movie are you referring to? Give me the year or some distinct part of the movie name. Please clarify, because you might have meant any of:\n{}"
 
     def finalMovieDialogue(self):
         return """Now that I know how you felt about {}, 
@@ -895,11 +944,11 @@ class Goose:
         responses = [
             "Ok, lets just try this again. Is there a movie you have an opinion about?",
             "I gave you a list to choose from, you just haves to pick one.... HONK",
-            "HONK " * self.honk_num + "Look. CHOOSE ONE OF THE MOVIES I GAVE YOU"
+            "HONK " * (-1 * self.goose_emotion)  + "Look. CHOOSE ONE OF THE MOVIES I GAVE YOU"
             #"OKAY LAST CHANCE HONK! "
         ]
 
-        return random.choice(responses) + random.choice(self.goose_emotion_response[self.goose_emotion])
+        return random.choice(responses) + self.goose_emotion_response(self.goose_emotion)
 
 
 
@@ -909,7 +958,7 @@ class Goose:
                  " Have you considered {}",
                  " Have you heard of {}",
                  " {} is NOT my cup of tea but it might fit your terrible taste. HONK!",
-                 " HONK!" * self.honk_num + " Consider watching {}, you might like it"]
+                 " HONK!" * (-1 * self.goose_emotion)  + " Consider watching {}, you might like it"]
 
         return random.choice(rec) + (self.recommendationApprovalDialogue(False))# + random.choice(self.goose_emotion_response[self.goose_emotion]) 
  
@@ -922,9 +971,9 @@ class Goose:
 
     def postRecommendationDialogue(self, used):
         if used:
-            return "Hope you enjoyed these recommendations!" + random.choice(self.goose_emotion_response[self.goose_emotion])
+            return "Hope you enjoyed these recommendations!" + self.goose_emotion_response(self.goose_emotion)
         else:
-            return "HONK! " * self.honk_num + " What was the point of you asking about the movies then!" + random.choice(self.goose_emotion_response[self.goose_emotion])
+            return "HONK! " * (-1 * self.goose_emotion)  + " What was the point of you asking about the movies then!" + self.goose_emotion_response(self.goose_emotion)
 
     def askedFor20MoviesDialogue(self):
         return """Were the 20 movies I gave you not enough? Like we all know you have NOT watched all those movies yet. HONK!HONK!
@@ -939,12 +988,12 @@ class Goose:
     def positiveSentiment(self):
 
         positive_rec = [
-        " HONK! HONK! I am glad you liked {}.", 
+        " HONK! HONK! I am glad you liked {}. ", 
         " HONK I liked {} too. ", 
         " HONK {} is pretty good. ",
-        " its not as good as Father Goose but {} is ok",
-        " GOOSENET aproves of {}. HONK!",
-        " {} is a good movie. But do you like" + random.choice(self.goose_movies) + " Cause its one of my favorite movies",
+        " its not as good as Father Goose but {} is ok ",
+        " GOOSENET aproves of {}. HONK! ",
+        " {} is a good movie. But do you like " + random.choice(self.goose_movies) + " Cause its one of my favorite movies ",
         " So you " + random.choice(self.pos_words) + " {}. "
         ]
         return random.choice(positive_rec)
@@ -953,21 +1002,21 @@ class Goose:
         negative_rec = [
             " I am sorry HONK! that HONK! you didnt like {}. " ,
             " HONK! agree to disagree about {}. HONK! ",
-            " HONK {} was a pretty bad movie",
-            " So you didnt really enjoy {} HONK.",
+            " HONK {} was a pretty bad movie ",
+            " So you didnt really enjoy {} HONK. ",
             " So you " + random.choice(self.neg_words) + " {}. ",
-            " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good"
+            " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good "
             ]
         return random.choice(negative_rec)        
     def sentimentFollowUp(self):
         rec_followup = [
-            " Anything else you want to tell me HONK! ? ", 
-            " What else? HONK!",
-            " What are some other movies you liked?",
-            " HONK! I need more recomendations to idenity humanities weak... I mean to help you find cool movies"
+            "Anything else you want to tell me HONK! ? ", 
+            "What else? HONK! ",
+            "What are some other movies you liked? ",
+            "HONK! I need more recomendations to idenity humanities weak... I mean to help you find cool movies "
 
             ]
-        return random.choice(rec_followup) + random.choice(self.goose_emotion_response[self.goose_emotion])
+        return random.choice(rec_followup) + self.goose_emotion_response(self.goose_emotion)
 
         # Could add a something that changes the state to something like the disambiguation.
         # To get more clairification about the movie that was already mentioned.
@@ -977,10 +1026,10 @@ class Goose:
         "I didnt catch how you felt about {}",
         "HONK I need your emotions and feelings about {}"
         ]
-        return "AHHHHHHH" + random.choice(self.goose_emotion_response[self.goose_emotion])
+        return random.choice(unknown) #+ random.choice(self.goose_emotion_response[self.goose_emotion])
 
     def doneRecommendingDialogue(self):
-        return "The Goose is done with you!  Take the hint and HONK! get lost."
+        return "The Goose is done with you!  Take the hint and " + ("HONK! " * (-1 * self.goose_emotion)) + "get lost."
 
 
 
