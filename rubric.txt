@@ -54,7 +54,9 @@ Noah:
 
 #########################################################################################
 # Optional: Feel free to include anything else that you want us to know about your      #
-# implementation!                                                                       #
+# implementation!# 
+The goose has a limited knowledge base about itself and can detect when the user asks questions about itself.
+It can also detect questions and as well greetings!
 #########################################################################################
 
 

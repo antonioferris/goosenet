@@ -17,13 +17,12 @@ class Goose:
         self.goose_emotion = ""
         self.honk_num = 1
         self.prev_line = ""
-        self.name = "Reginald"
-        #favorite goose movies
+       
         # these need to be formated like that acutal movies still
 
         self.greeting_words = ["hello", "hi", "greetings", "howdy", "hey", "what's up"]
         self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies", "Braveheart"]
-
+        self.knowledge ={"name":" reginald ", "color":"blue ", "movie": "Father Goose or the Terminator", "band":" metallica ", "music": " Goose Metal "}
 
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor
@@ -47,12 +46,18 @@ class Goose:
         ]   
 
     def question_process(self, nouns, verbs, is_goose_subject):
-        if is_goose_subject:
-            return "Why are you talking about me! Talk about movies!"
+        if is_goose_subject: # if they are asking about the goose
+            # can detenct sentiment here
+            if ([x for x in nouns if x in self.knowledge]):
+                similarity = [x for x in nouns if x in self.knowledge]
+                return "Honk! Well my " + similarity[0] + " is " + self.knowledge[similarity[0]]
+            else: 
+                return "I dont have knowledge about" + nouns[1] + "."
+           
         return "Look I know a lot about the stuff you just asked but I will get to it."
 
     def greeting_handling(self, nouns, verbs):
-        return "Honk!" + random.choice(self.greeting_words) + "!"
+        return "Honk! " + random.choice(self.greeting_words) + "!"
 
     def get_subjects(self, line):
         """
@@ -77,8 +82,8 @@ class Goose:
 
         
 
-        goose_pat = re.compile('goose | goosenet | goose bot | bot | you ')
-        is_goose_subject = False#bool([x if (goose_pat.findall(x)) for x in text ])
+        goose_pat = re.compile('goose | goosenet | goose bot | bot | you | your ')
+        is_goose_subject = True#bool([x if (goose_pat.findall(x)) for x in text ])
 
 
 
