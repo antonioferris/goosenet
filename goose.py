@@ -166,6 +166,9 @@ class Goose:
         Probably, I mean those were like the best ones too. Your loss. HONK!
          """
 
+    def multipleMoviesOutput(titles_sent):
+        return str(titles_sent)
+
     #dialouge for when the user gives a movie with positive sentiment
     def positiveSentiment(self):
 
