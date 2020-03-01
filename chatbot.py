@@ -552,17 +552,52 @@ class Chatbot:
             # If the clarification is a substring of the movie, title, it is probably the right movie
             if clarification in title_text:
                 return True
+
+            # replace common extra words users add and check again
+            clarification_ = clarification.replace('one', '')
+            clarification_ = clarification_.replace('the', '')
+            clarification_ = clarification_.replace('movie', '')
+            clarification_ = clarification_.strip()
+            if clarification_ in title_text:
+                return True
             return False
         # Filter the candiates out if they don't match the clarification (substring / year match)
         filtered_candidates = list(filter(remains_valid, candidates))
 
+        NUMBER_MAP = {
+            'first' : 1,
+            # 'one' : 1, omitted because one can also refer to an object
+            'second' : 2,
+            'two' : 2,
+            'third' : 3,
+            'three' : 3,
+            'four' : 4,
+            'fourth' : 4,
+            'fifth' : 5,
+            'five' : 5,
+            'six' : 6,
+            'sixth' : 6,
+            'seven' : 7,
+            'seventh' : 7,
+            'eight' : 8,
+            'eighth' : 8,
+            'nine' : 9,
+            'ninth' : 9,
+            'ten' : 10,
+            'tenth' : 10
+        }
         try:
             #If the clarification is an int, it might be an index into our list (1-indexed)
             idx = int(clarification)
             if 0 < idx <= len(candidates) and candidates[idx-1] not in filtered_candidates:
                 filtered_candidates.append(candidates[idx-1])
         except ValueError:
-            pass
+            for key in NUMBER_MAP:
+                if key in clarification.lower():
+                    idx = NUMBER_MAP[key]
+                    if 0 < idx <= len(candidates) and candidates[idx-1] not in filtered_candidates:
+                        filtered_candidates.append(candidates[idx-1])
+            
 
         # check against time requests
         if 'recent' in clarification or 'newest' in clarification:
@@ -574,6 +609,8 @@ class Chatbot:
                     return -1
             # If we want the "newest" movie, we add the max year (newest) movie to filtered_candidates
             filtered_candidates.append(max(candidates, key = lambda t : get_year(t)))
+
+        
         return filtered_candidates
 
     #############################################################################

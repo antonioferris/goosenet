@@ -38,7 +38,7 @@ class Goose:
         "You know human, I might have to keep you alive when this is all over."
         ]
         self.goose_emotion_response["dictator"] =  [
-        ]
+        ]   
 
     def question_process(self, line, tagged_tokens):
         subjects = self.get_subjects(tagged_tokens)
