@@ -19,6 +19,7 @@ class Goose:
         #favorite goose movies
         # these need to be formated like that acutal movies still
         self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies"]
+        self.greeting_words = ["hello", "hi", "greetings", "howdy", "hey", "what's up"]
 
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor
@@ -41,9 +42,12 @@ class Goose:
         self.goose_emotion_response["dictator"] =  [
         ]   
 
-    def question_process(self, line, tagged_tokens):
-        subjects = self.get_subjects(tagged_tokens)
-        return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
+    def question_process(self, nouns, verbs):
+        
+        return "Look I know a lot about the stuff you just asked but I will get to it."
+
+    def greeting_handling(nouns, verbs):
+
 
     def get_subjects(self, line):
         """
@@ -65,9 +69,16 @@ class Goose:
             return "speak with good sentences man"
         main_subject = ""
         main_subject = subjects[0]  
+
+
+        # determine if what is being asked is a question
+        if text[0] in self.QUESTION_WORDS:
+            return question_process(subjects, verbs)
+        if (text[0] in self.greeting_words):
+            return greeting_handling(subjects, verbs)
         
         
-        return "so you " + verbs[0] + " " + subjects[1]
+        return "temp so doesnt crash"
 
     def noTitlesIdentified(self):
 
