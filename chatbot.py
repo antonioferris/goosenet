@@ -150,9 +150,10 @@ class Chatbot:
             return self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list]))
 
     def update_multiple_preferences(self, title_sents):
+        response = ''
         for title_id, sent in title_sents:
             self.sentiment = sent
-            response = update_with_preferences(title_list)
+            response += ' ' + self.update_with_preferences([title_id])
         return response
 
 
@@ -199,9 +200,10 @@ class Chatbot:
                         all_specific = False
                         break
                 if all_specific: #multiple specific titles are present and work well
+                    print('Attempting multiple movies at once!')
                     title_sents = self.extract_sentiment_for_movies(line)
-                    title_sents = [(self.self.find_movies_by_title(title), sent) for title, sent in title_sents]
-                    return self.update_multiple_preferences(title_sents)
+                    title_sents = [(self.find_movies_by_title(title)[0], sent) for title, sent in title_sents]
+                    return self.update_multiple_preferences(title_sents) + self.goose.sentimentFollowUp()
 
                 
             title_list = self.find_movies_by_title(titles[0])
@@ -220,7 +222,7 @@ class Chatbot:
                 self.params = {'title_list' : title_list, 'misspelled' : True}
                 self.curr_func = self.disambiguate_flow
                 return self.goose.disambiguationDialogue(True).format('\n'.join([self.title_text(i) for i in title_list]))
-        return self.update_with_preferences(title_list)
+        return self.update_with_preferences(title_list) + self.goose.sentimentFollowUp()
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
