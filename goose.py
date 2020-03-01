@@ -48,8 +48,8 @@ class Goose:
         
         return "Look I know a lot about the stuff you just asked but I will get to it."
 
-    def greeting_handling(nouns, verbs):
-
+    def greeting_handling(self, nouns, verbs):
+        return "Honk! Hello!"
 
     def get_subjects(self, line):
         """
@@ -70,14 +70,17 @@ class Goose:
         if (not subjects):
             return "speak with good sentences man"
         main_subject = ""
-        main_subject = subjects[0]  
+        main_subject = subjects[0]
+
+        is_goose_subject = False
+
 
 
         # determine if what is being asked is a question
         if text[0] in self.QUESTION_WORDS:
-            return question_process(subjects, verbs)
+            return self.question_process(subjects, verbs)
         if (text[0] in self.greeting_words):
-            return greeting_handling(subjects, verbs)
+            return self.greeting_handling(subjects, verbs)
         
         
         return "temp so doesnt crash"
