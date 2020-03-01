@@ -36,6 +36,7 @@ Antonio:
     Wrote title_match, used for most of the finding movies by title
     Wrote the process function, created a Goose class to centralize dialogue options
     Decomposed process into recommendation_flow, disambiguate_flow, update_with_preferences, and acquire_movie_preferences
+    Added dialogue for extract_sentiment_from_movies
 Colin:
     Wrote code to pull the parts of speech of words out of the user input
     Added tons of dialogue options to the Goose class
@@ -57,7 +58,9 @@ Noah:
 
 #########################################################################################
 # Optional: Feel free to include anything else that you want us to know about your      #
-# implementation!                                                                       #
+# implementation!# 
+The goose has a limited knowledge base about itself and can detect when the user asks questions about itself.
+It can also detect questions and as well greetings!
 #########################################################################################
 
 
