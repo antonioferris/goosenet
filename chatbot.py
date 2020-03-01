@@ -184,6 +184,8 @@ class Chatbot:
             if not titles:
                 # If we found no titles, we go to a general dialogue
                 return self.goose.noQuotedTitlesFoundDialogue(line)
+            if len(titles) > 1:
+                
             title_list = self.find_movies_by_title(titles[0])
         
         # Otherwise, we already have a title_list and might be trying to disambiguate it
