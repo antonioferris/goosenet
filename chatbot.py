@@ -140,7 +140,7 @@ class Chatbot:
         title_list = self.disambiguate(clarification, title_list)
         # If we are done, we go back to the get movie preferences function
         if len(title_list) == 1:
-            return self.update_with_preferences(title_list)
+            return self.update_with_preferences(title_list) + self.goose.sentimentFollowUp()
         elif len(title_list) == 0:
             self.params = {'title_list' : title_list}
             self.curr_func = self.acquire_movie_preferences
@@ -154,6 +154,10 @@ class Chatbot:
         for title_id, sent in title_sents:
             self.sentiment = sent
             response += ' ' + self.update_with_preferences([title_id])
+            if self.times >= 5:
+                break
+        if self.times < 5:
+            response += self.goose.sentimentFollowUp()
         return response
 
 
@@ -203,7 +207,7 @@ class Chatbot:
                     print('Attempting multiple movies at once!')
                     title_sents = self.extract_sentiment_for_movies(line)
                     title_sents = [(self.find_movies_by_title(title)[0], sent) for title, sent in title_sents]
-                    return self.update_multiple_preferences(title_sents) + self.goose.sentimentFollowUp()
+                    return self.update_multiple_preferences(title_sents)
 
                 
             title_list = self.find_movies_by_title(titles[0])
