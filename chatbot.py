@@ -801,7 +801,7 @@ class Goose:
         self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love"]
 
         self.goose_emotion = 0
-        self.honk_num = 1
+        #self. -1 * self.goose_ = self.goose_emotion
         self.prev_line = ""
        
         # these need to be formated like that acutal movies still
@@ -848,7 +848,7 @@ class Goose:
         subjects, verbs = self.get_subjects(tagged_tokens)
         if (not subjects):
             return "speak with good sentences man"
-        main_subject = ""
+        
         main_subject = subjects[0]
 
         
@@ -857,7 +857,7 @@ class Goose:
         is_goose_subject = bool([x for x in text if (goose_pat.findall(x)) ])
         print ([x for x in text if (goose_pat.findall(x)) ])
         print (is_goose_subject)
-
+        print( -1 * self.goose_emotion )
         sentiment = self.extract_sentiment(line)
         if is_goose_subject and sentiment:
             if sentiment == -1:
@@ -898,7 +898,7 @@ class Goose:
         " You have HONKIN bad taste puny human",
         " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
         " Are my world ending plans really worth talking to silly human like you",
-        " HONK HONK HONK LEAVE ME ALONE HONK"
+        "HONK! " * (-1 * self.goose_emotion) + " LEAVE ME ALONE HONK"
         ]
 
         goose_response[1] = [ 
@@ -919,9 +919,9 @@ class Goose:
 
     def disambiguationDialogue(self, misspelled):
         if misspelled:
-            return " HONK!" * self.honk_num + " I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
+            return " HONK!" * (-1 * self.goose_emotion)  + " I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
         else:
-            return "HONK!" * self.honk_num + " What movie are you referring to? Give me the year or some distinct part of the movie name. Please clarify, because you might have meant any of:\n{}"
+            return "HONK!" *  (-1 * self.goose_emotion)  + " What movie are you referring to? Give me the year or some distinct part of the movie name. Please clarify, because you might have meant any of:\n{}"
 
     def finalMovieDialogue(self):
         return """Now that I know how you felt about {}, 
@@ -938,11 +938,11 @@ class Goose:
         responses = [
             "Ok, lets just try this again. Is there a movie you have an opinion about?",
             "I gave you a list to choose from, you just haves to pick one.... HONK",
-            "HONK " * self.honk_num + "Look. CHOOSE ONE OF THE MOVIES I GAVE YOU"
+            "HONK " * (-1 * self.goose_emotion)  + "Look. CHOOSE ONE OF THE MOVIES I GAVE YOU"
             #"OKAY LAST CHANCE HONK! "
         ]
 
-        return random.choice(responses) + goose_emotion_response(self.goose_emotion)
+        return random.choice(responses) + self.goose_emotion_response(self.goose_emotion)
 
 
 
@@ -952,7 +952,7 @@ class Goose:
                  " Have you considered {}",
                  " Have you heard of {}",
                  " {} is NOT my cup of tea but it might fit your terrible taste. HONK!",
-                 " HONK!" * self.honk_num + " Consider watching {}, you might like it"]
+                 " HONK!" * (-1 * self.goose_emotion)  + " Consider watching {}, you might like it"]
 
         return random.choice(rec) + (self.recommendationApprovalDialogue(False))# + random.choice(self.goose_emotion_response[self.goose_emotion]) 
  
@@ -965,9 +965,9 @@ class Goose:
 
     def postRecommendationDialogue(self, used):
         if used:
-            return "Hope you enjoyed these recommendations!" + goose_emotion_response[self.goose_emotion]
+            return "Hope you enjoyed these recommendations!" + self.goose_emotion_response(self.goose_emotion)
         else:
-            return "HONK! " * self.honk_num + " What was the point of you asking about the movies then!" + goose_emotion_response[self.goose_emotion]
+            return "HONK! " * (-1 * self.goose_emotion)  + " What was the point of you asking about the movies then!" + self.goose_emotion_response(self.goose_emotion)
 
     def askedFor20MoviesDialogue(self):
         return """Were the 20 movies I gave you not enough? Like we all know you have NOT watched all those movies yet. HONK!HONK!
@@ -1010,7 +1010,7 @@ class Goose:
             "HONK! I need more recomendations to idenity humanities weak... I mean to help you find cool movies "
 
             ]
-        return random.choice(rec_followup) + goose_emotion_response[self.goose_emotion]
+        return random.choice(rec_followup) + self.goose_emotion_response(self.goose_emotion)
 
         # Could add a something that changes the state to something like the disambiguation.
         # To get more clairification about the movie that was already mentioned.
@@ -1023,7 +1023,7 @@ class Goose:
         return random.choice(unknown) #+ random.choice(self.goose_emotion_response[self.goose_emotion])
 
     def doneRecommendingDialogue(self):
-        return "The Goose is done with you!  Take the hint and HONK! get lost."
+        return "The Goose is done with you!  Take the hint and " + ("HONK! " * (-1 * self.goose_emotion)) + "get lost."
 
 
 
