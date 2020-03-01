@@ -50,7 +50,10 @@ Noah:
     Changed sentiment.txt to reflect the porter-stemmed words from PorterStemmer
     Created structure to parse negations and reverse sentiment accordingly
     Wrote linear algebra backend for the recommend function
-    Wrote extract_sentiment_from movies, which split sentences across conjunctions and extracted sentiment within the pieces
+    Wrote extract_sentiment_from_movies, which split sentences across movie titles and extracted sentiment within the pieces
+    using the recursive get_previous_sentiment function
+    Fixed Goosenet's response to 0 sentiment comments
+    
 
 #########################################################################################
 # Optional: Feel free to include anything else that you want us to know about your      #
