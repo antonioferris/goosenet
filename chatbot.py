@@ -8,6 +8,7 @@ import numpy as np
 import random
 import re
 import random as r
+import collections
 from PorterStemmer import PorterStemmer
 
 # noinspection PyMethodMayBeStatic
@@ -321,10 +322,10 @@ class Chatbot:
                 movie = a + ' ' + movie[:-len(a)-2]
             if title.endswith(', ' + a):
                 title = a + ' ' + title[:-len(a)-2]
-        if self.levenshtein(movie, title) <= edit_distance:
-            return True
+        if edit_distance > 0:
+            return self.levenshtein(movie, title)
         else:
-            return title in movie
+            return substring_match and title in movie
 
     def find_movies_by_title(self, title):
         """ Given a movie title, return a list of indices of matching movies.
@@ -345,11 +346,10 @@ class Chatbot:
         r = []
         for i in range(len(self.titles)):
             movie = self.titles[i][0]
-            if self.title_match(title.upper(), movie.upper()):
+            if self.title_match(title.upper(), movie.upper(), substring_match=True):
                 r.append(i)
             elif self.creative and self.title_match(title.upper(), movie.upper(), substring_match=True):
                 r.append(i)
-        
         return r
 
     def get_stemmed(self, preprocessed_input):
@@ -524,11 +524,16 @@ class Chatbot:
         :returns: a list of movie indices with titles closest to the given title and within edit distance max_distance
         """
         r = []
+        dists = collections.defaultdict(list)
         for i in range(len(self.titles)):
             movie = self.titles[i][0]
-            if self.title_match(title.upper(), movie.upper(), edit_distance=max_distance):
-                r.append(i)
-        return r
+            d = self.title_match(title.upper(), movie.upper(), edit_distance=max_distance)
+            if d <= max_distance:
+                dists[d].append(i)
+        for poss_dist in range(max_distance+1):
+            if dists[poss_dist]:
+                return dists[poss_dist]
+        return []
 
     def disambiguate(self, clarification, candidates):
         """Creative Feature: Given a list of movies that the user could be talking about

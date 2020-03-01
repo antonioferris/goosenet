@@ -225,6 +225,21 @@ def test_find_movies_closest_to_title():
             [1656],
             "Incorrect output for test_find_movies_closest_to_title('{}', max_distance={})".format(misspelled, 3),
             orderMatters=False
+    ) and assertListEquals(
+            chatbot.find_movies_closest_to_title("Te", max_distance=3),
+            [8082, 4511, 1664],
+            "Incorrect output for test_find_movies_closest_to_title('{}', max_distance={})".format("Te", 3),
+            orderMatters=False
+    ) and assertListEquals(
+            chatbot.find_movies_closest_to_title("BAT-MAAAN", max_distance=3),
+            [524, 5743],
+            "Incorrect output for test_find_movies_closest_to_title('{}', max_distance={})".format("BAT-MAAAN", 3),
+            orderMatters=False
+    ) and assertListEquals(
+            chatbot.find_movies_closest_to_title("Blargdeblargh", max_distance = 4),
+            [],
+            "Incorrect output for test_find_movies_closest_to_title('{}', max_distance={})".format("Blargdeblargh", 4),
+            orderMatters=False
     ):
         print('find_movies_closest_to_title() sanity check passed!')
     print()
@@ -306,9 +321,6 @@ def main():
     testing_creative = args.creative
 
     test_extract_titles()
-
-    test_extract_sentiment_for_movies() ##deleteeeee
-
     test_find_movies_by_title()
     test_extract_sentiment()
     test_recommend()
