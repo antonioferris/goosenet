@@ -259,6 +259,16 @@ def test_disambiguate():
             [524],
             "Incorrect output for disambiguate('{}', {})".format("most recent", [524, 5743]),
             orderMatters=False
+    ) and assertListEquals(
+            chatbot.disambiguate("the Goblet of Fire one", [3812, 4325, 5399, 6294, 6735, 7274, 7670, 7842]),
+            [6294],
+            "Incorrect output for disambiguate('{}', {})".format("the Goblet of Fire one", [3812, 4325, 5399, 6294, 6735, 7274, 7670, 7842]),
+            orderMatters=False
+    ) and assertListEquals(
+            chatbot.disambiguate("the second one", [3812, 6294, 4325, 5399, 6735, 7274, 7670, 7842]),
+            [6294],
+            "Incorrect output for disambiguate('{}', {})".format("the second one", [3812, 6294, 4325, 5399, 6735, 7274, 7670, 7842]),
+            orderMatters=False
     ):
         print('disambiguate() sanity check passed!')
     print()

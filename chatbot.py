@@ -103,13 +103,7 @@ class Chatbot:
     # 2. Modules 2 and 3: extraction and transformation                           #
     ###############################################################################
 
-    def get_subjects(self, line):
-        """
-        Returns a list of subjects detected in a sentence or an empty list if none
-        """
-        
-        words = [ i[0] for i in line if 'N' in i[1]] 
-        return words
+
 
     def title_text(self, i):
             title_str = self.titles[i][0]
@@ -121,9 +115,6 @@ class Chatbot:
                     title_str = a + ' ' + title_str[:-len(a)-2]
             return title_str
 
-    def question_process(self, line, tagged_tokens):
-        subjects = self.get_subjects(tagged_tokens)
-        return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
     def recommendation_flow(self, line, rec, i):
         # First, we check if the user wanted another recommendation!
@@ -174,7 +165,7 @@ class Chatbot:
             rec = self.recommend(self.vec, self.binarized_ratings, k=20)
             self.params = {'i' : 0, 'rec' : rec}
             self.curr_func = self.recommendation_flow
-            response += ' ' + self.goose.recommendationApprovalDialogue(first_time=True)
+            response = self.goose.finalMovieDialogue() + ' ' + self.goose.recommendationApprovalDialogue(first_time=True)
         else:
             self.params = {}
             self.curr_func = self.acquire_movie_preferences
@@ -191,7 +182,7 @@ class Chatbot:
             titles = self.extract_titles(line)
             if not titles:
                 # If we found no titles, we go to a general dialogue
-                return self.goose.noQuotedTitlesFoundDialogue()
+                return self.goose.noQuotedTitlesFoundDialogue(line)
             title_list = self.find_movies_by_title(titles[0])
         
         # Otherwise, we already have a title_list and might be trying to disambiguate it
@@ -201,10 +192,10 @@ class Chatbot:
             self.curr_func = self.disambiguate_flow
             return self.goose.disambiguationDialogue(False).format('\n'.join([self.title_text(i) for i in title_list]))
         elif len(title_list) == 0:
-            possible_titles = self.find_movies_closest_to_title(titles[0])
-            if len(possible_titles) == 0:
+            title_list = self.find_movies_closest_to_title(titles[0])
+            if len(title_list) == 0:
                 return self.goose.noTitlesIdentified()
-            else:
+            elif len(title_list) > 1:
                 self.params = {'title_list' : title_list, 'misspelled' : True}
                 self.curr_func = self.disambiguate_flow
                 return self.goose.disambiguationDialogue(True).format('\n'.join([self.title_text(i) for i in title_list]))
@@ -559,17 +550,52 @@ class Chatbot:
             # If the clarification is a substring of the movie, title, it is probably the right movie
             if clarification in title_text:
                 return True
+
+            # replace common extra words users add and check again
+            clarification_ = clarification.replace('one', '')
+            clarification_ = clarification_.replace('the', '')
+            clarification_ = clarification_.replace('movie', '')
+            clarification_ = clarification_.strip()
+            if clarification_ in title_text:
+                return True
             return False
         # Filter the candiates out if they don't match the clarification (substring / year match)
         filtered_candidates = list(filter(remains_valid, candidates))
 
+        NUMBER_MAP = {
+            'first' : 1,
+            # 'one' : 1, omitted because one can also refer to an object
+            'second' : 2,
+            'two' : 2,
+            'third' : 3,
+            'three' : 3,
+            'four' : 4,
+            'fourth' : 4,
+            'fifth' : 5,
+            'five' : 5,
+            'six' : 6,
+            'sixth' : 6,
+            'seven' : 7,
+            'seventh' : 7,
+            'eight' : 8,
+            'eighth' : 8,
+            'nine' : 9,
+            'ninth' : 9,
+            'ten' : 10,
+            'tenth' : 10
+        }
         try:
             #If the clarification is an int, it might be an index into our list (1-indexed)
             idx = int(clarification)
             if 0 < idx <= len(candidates) and candidates[idx-1] not in filtered_candidates:
                 filtered_candidates.append(candidates[idx-1])
         except ValueError:
-            pass
+            for key in NUMBER_MAP:
+                if key in clarification.lower():
+                    idx = NUMBER_MAP[key]
+                    if 0 < idx <= len(candidates) and candidates[idx-1] not in filtered_candidates:
+                        filtered_candidates.append(candidates[idx-1])
+            
 
         # check against time requests
         if 'recent' in clarification or 'newest' in clarification:
@@ -581,6 +607,8 @@ class Chatbot:
                     return -1
             # If we want the "newest" movie, we add the max year (newest) movie to filtered_candidates
             filtered_candidates.append(max(candidates, key = lambda t : get_year(t)))
+
+        
         return filtered_candidates
 
     #############################################################################

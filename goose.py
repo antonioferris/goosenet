@@ -3,6 +3,7 @@
     and other functions having to do with goosenet dialogue
 '''
 import random
+import nltk
 
 class Goose:
     def __init__(self):
@@ -38,7 +39,40 @@ class Goose:
         "You know human, I might have to keep you alive when this is all over."
         ]
         self.goose_emotion_response["dictator"] =  [
-        ]
+        ]   
+
+    def question_process(self, line, tagged_tokens):
+        subjects = self.get_subjects(tagged_tokens)
+        return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
+
+    def get_subjects(self, line):
+        """
+        Returns a list of subjects detected in a sentence or an empty list if none
+        """
+        # should be list(tuple(str, str))
+        #print(line[0]) 
+
+        nouns = [x for x, y in line if "NN" in y]
+        verbs = [x for x, y in line if "V" in y]
+        return nouns, verbs
+
+    def noQuotedTitlesFoundDialogue(self, line):
+        text = nltk.word_tokenize(line.lower())
+        tagged_tokens = nltk.pos_tag(text)
+        print(tagged_tokens)
+        subjects, verbs = self.get_subjects(tagged_tokens)
+        if (not subjects):
+            return "speak with good sentences man"
+        main_subject = ""
+        main_subject = subjects[0]  
+        
+        
+        return "so you " + verbs[0] + " " + subjects[1]
+
+    def noTitlesIdentified(self):
+
+        return "HONK HONK TODO NO TITLES IDENTFIED"
+
     def goose_fav_movie(self, movie):
         response = ["I love " + movie +". It is one of my favorites!",
         "Great movie taste."
@@ -52,15 +86,16 @@ class Goose:
     def isAffirmativeResponse(self, user_input):
         return 'y' in user_input.lower()
 
-    def noQuotedTitlesFoundDialogue(self):
-
-        return "I am a Goose on a mission.  If you're not talking movies or US supply lines, I don't want to talk."
-
     def disambiguationDialogue(self, misspelled):
         if misspelled:
             return " HONK!" * self.honk_num + " I can spell better and I dont even have hands. Perhaps you wanted one of these movies?\n{}"
         else:
             return "HONK!" * self.honk_num + " What movie are you referring to? Give me the year or some distinct part of the movie name. Please clarify, because you might have meant any of:\n{}"
+
+    def finalMovieDialogue(self):
+        return """Now that I know how you felt about {}, I have enough information to perfectly predict the rest of your life.  
+        I could tell you how you die (no geese are involved, but a feather duster and legos are).  
+        Instead I'm just going to recommend you a movie."""
 
     def indexDisambiguationDialogue(self):
         return "Well now you've done it. You need to be actually specific. Please just type the number of the movie you want\n{}"
@@ -78,8 +113,7 @@ class Goose:
 
         return random.choice(responses) + random.choice(self.goose_emotion_response[self.goose_emotion])
 
-    def noTitlesIdentified(self):
-        return "HONK TO DO HONK I GOT NO CLUE WHAT YOU ARE TALKING ABOUT"
+
 
     def recommendationDialogue(self):
         rec = [
