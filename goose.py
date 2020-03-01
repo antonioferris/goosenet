@@ -175,7 +175,7 @@ class Goose:
         " {} is a good movie. But do you like" + random.choice(self.goose_movies) + " Cause its one of my favorite movies",
         " So you " + random.choice(self.pos_words) + " {}. "
         ]
-        return random.choice(positive_rec) + self.sentimentFollowUp() #+ random.choice(self.goose_emotion_response[self.goose_emotion])
+        return random.choice(positive_rec)
     # can add in advanced dialogue options based on line processing like ELIZA
     def negativeSentiment(self):
         negative_rec = [
@@ -185,10 +185,8 @@ class Goose:
             " So you didnt really enjoy {} HONK.",
             " So you " + random.choice(self.neg_words) + " {}. ",
             " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good"
-            " "
-            
             ]
-        return random.choice(negative_rec) + self.sentimentFollowUp()           
+        return random.choice(negative_rec)        
     def sentimentFollowUp(self):
         rec_followup = [
             " Anything else you want to tell me HONK! ? ", 
