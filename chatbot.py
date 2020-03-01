@@ -151,21 +151,22 @@ class Chatbot:
 
     def update_with_preferences(self, title_list):
         sentiment = self.sentiment_rating
+        title_text = self.title_text(title_list[0])
         if sentiment > 0:
             # need to implement some sort of caching here.
-            response = self.goose.positiveSentiment().format(self.title_text(title_list[0]))
+            response = self.goose.positiveSentiment().format(title_text)
             self.times += 1
         elif sentiment < 0:
-            response = self.goose.negativeSentiment().format(self.title_text(title_list[0]))
+            response = self.goose.negativeSentiment().format(title_text)
             self.times += 1
         else:
-            response = self.goose.unknownSentiment().format(self.title_text(title_list[0]))
+            response = self.goose.unknownSentiment().format(title_text)
         self.vec[title_list[0]] = sentiment
         if self.times >= 5:
             rec = self.recommend(self.vec, self.binarized_ratings, k=20)
             self.params = {'i' : 0, 'rec' : rec}
             self.curr_func = self.recommendation_flow
-            response = self.goose.finalMovieDialogue() + ' ' + self.goose.recommendationApprovalDialogue(first_time=True)
+            response = self.goose.finalMovieDialogue().format(title_text) + ' ' + self.goose.recommendationApprovalDialogue(first_time=True)
         else:
             self.params = {}
             self.curr_func = self.acquire_movie_preferences
