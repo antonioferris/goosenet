@@ -410,6 +410,9 @@ class Chatbot:
         n't"""
         NEGATION_RE = re.compile(NEGATION, re.VERBOSE)
 
+        INTENSIFIER = r"""^(?:realli|actual|truli|honestli|in fact|as a matter of fact|in realiti|genuin)$"""
+        INTENSIFIER_RE = re.compile(INTENSIFIER)
+
         input_sentiment = 0
         for i in range(len(preprocessed_input)):
             delta = 0
@@ -418,6 +421,9 @@ class Chatbot:
                 delta = 1
             elif word_sentiment == 'neg':
                 delta = -1
+            
+            if i > 1 and INTENSIFIER_RE.search(preprocessed_input[i-1]) and NEGATION_RE.search(preprocessed_input[i-2]):
+                delta *= -1
             if i > 0 and NEGATION_RE.search(preprocessed_input[i-1]):
                 delta *= -1
 
