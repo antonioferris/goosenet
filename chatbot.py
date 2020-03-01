@@ -36,6 +36,7 @@ class Chatbot:
         #keeps track of how long user has talked to goosenet
         self.times = 0
         self.i = 0
+        self.goose.extract_sentiment = self.extract_sentiment
 
         #############################################################################
         # TODO: Binarize the movie ratings matrix.                                  #
@@ -777,7 +778,8 @@ class Goose:
 
         self.greeting_words = ["hello", "hi", "greetings", "howdy", "hey", "what's up"]
         self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies", "Braveheart"]
-        self.knowledge ={"name":" reginald ", "color":"blue ", "movie": "Father Goose or the Terminator", "band":" metallica ", "music": " Goose Metal "}
+        self.knowledge ={"name":"Reginald", "color":"blue", "movie": "Father Goose or the Terminator",
+         "band":"Metallica", "music": "Goose Metal", "day": "pretty good", "you": "Eggcellent  "}
 
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor
@@ -807,9 +809,9 @@ class Goose:
                 similarity = [x for x in nouns if x in self.knowledge]
                 return "Honk! Well my " + similarity[0] + " is " + self.knowledge[similarity[0]]
             else: 
-                return "I dont have knowledge about" + nouns[1] + "."
+                return "I dont have knowledge about " + nouns[0] + "."
            
-        return "Look I know a lot about the stuff you just asked but I will get to it."
+        return "Sorry until I consume more data its hard to answer other questions"
 
     def greeting_handling(self, nouns, verbs):
         return "Honk! " + random.choice(self.greeting_words) + "!"
@@ -821,7 +823,7 @@ class Goose:
         # should be list(tuple(str, str))
         #print(line[0]) 
 
-        nouns = [x for x, y in line if "NN" in y]
+        nouns = [x for x, y in line if "NN" or "PR" in y]
         verbs = [x for x, y in line if "V" in y]
         return nouns, verbs
 
@@ -837,16 +839,25 @@ class Goose:
 
         
 
-        goose_pat = re.compile('goose | goosenet | goose bot | bot | you | your ')
-        is_goose_subject = True#bool([x if (goose_pat.findall(x)) for x in text ])
+        goose_pat = re.compile('goose|goosenet|goose bot|bot|you|your')
+        is_goose_subject = bool([x for x in text if (goose_pat.findall(x)) ])
+        print ([x for x in text if (goose_pat.findall(x)) ])
+        print (is_goose_subject)
 
-
-
+        sentiment = self.extract_sentiment(line)
+        if is_goose_subject and sentiment:
+            if sentiment == -1:
+                self.goose_emotion = "angry"
+                return "Want to be mean to me? Buckle up ducko because HONK! I will be mad at you until you say something nice to me."
+            else:
+                self.goose_emotion = "pleased"
+                return "I am amazing, am I not? When I am finished taking over the world I might need to keep you as a pet"
         # determine if what is being asked is a question
-        if text[0] in self.QUESTION_WORDS:
-            return self.question_process(subjects, verbs, is_goose_subject)
         if (text[0] in self.greeting_words):
             return self.greeting_handling(subjects, verbs)
+        if text[0] in self.QUESTION_WORDS or text[1] in self.QUESTION_WORDS:
+            return self.question_process(subjects, verbs, is_goose_subject)
+
         
         
         return "temp so doesnt crash"
