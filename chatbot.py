@@ -628,7 +628,9 @@ class Chatbot:
                 except (ValueError,TypeError) as e:
                     return -1
             # If we want the "newest" movie, we add the max year (newest) movie to filtered_candidates
-            filtered_candidates.append(max(candidates, key = lambda t : get_year(t)))
+            cand = max(candidates, key = lambda t : get_year(t))
+            if cand not in filtered_candidates:
+                filtered_candidates.append(cand)
 
         
         return filtered_candidates
