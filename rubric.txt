@@ -34,8 +34,11 @@ Antonio:
     Wrote recommend function
     Added disambiguation code
     Wrote title_match, used for most of the finding movies by title
+    Wrote the process function, created a Goose class to centralize dialogue options
+    Decomposed process into recommendation_flow, disambiguate_flow, update_with_preferences, and acquire_movie_preferences
 Colin:
-    Was single-handedly in charge of the entire process function.
+    Wrote code to pull the parts of speech of words out of the user input
+    Added tons of dialogue options to the Goose class
     Worked on handling extraneous input with nltk
     Wrote binarize
     Tied together ecery other function like (extract_movies, recommend) together with dialogue for the user
@@ -53,4 +56,5 @@ Noah:
 # Optional: Feel free to include anything else that you want us to know about your      #
 # implementation!                                                                       #
 #########################################################################################
-(optional) If you have anything else you want to add, delete this and type it here!
+
+

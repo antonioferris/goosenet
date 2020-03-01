@@ -4,6 +4,7 @@
 '''
 import random
 import nltk
+import re
 
 class Goose:
     def __init__(self):
@@ -16,6 +17,7 @@ class Goose:
         self.goose_emotion = ""
         self.honk_num = 1
         self.prev_line = ""
+        self.name = "Reginald"
         #favorite goose movies
         # these need to be formated like that acutal movies still
 
@@ -44,12 +46,13 @@ class Goose:
         self.goose_emotion_response["dictator"] =  [
         ]   
 
-    def question_process(self, nouns, verbs):
-        
+    def question_process(self, nouns, verbs, is_goose_subject):
+        if is_goose_subject:
+            return "Why are you talking about me! Talk about movies!"
         return "Look I know a lot about the stuff you just asked but I will get to it."
 
-    def greeting_handling(nouns, verbs):
-
+    def greeting_handling(self, nouns, verbs):
+        return "Honk!" + random.choice(self.greeting_words) + "!"
 
     def get_subjects(self, line):
         """
@@ -70,14 +73,20 @@ class Goose:
         if (not subjects):
             return "speak with good sentences man"
         main_subject = ""
-        main_subject = subjects[0]  
+        main_subject = subjects[0]
+
+        
+
+        goose_pat = re.compile('goose | goosenet | goose bot | bot | you ')
+        is_goose_subject = False#bool([x if (goose_pat.findall(x)) for x in text ])
+
 
 
         # determine if what is being asked is a question
         if text[0] in self.QUESTION_WORDS:
-            return question_process(subjects, verbs)
+            return self.question_process(subjects, verbs, is_goose_subject)
         if (text[0] in self.greeting_words):
-            return greeting_handling(subjects, verbs)
+            return self.greeting_handling(subjects, verbs)
         
         
         return "temp so doesnt crash"
@@ -156,6 +165,9 @@ class Goose:
         Now for the movies you have seen before you can tell me know what you thought about them and I can probably reccomend more.
         Probably, I mean those were like the best ones too. Your loss. HONK!
          """
+
+    def multipleMoviesOutput(titles_sent):
+        return str(titles_sent)
 
     #dialouge for when the user gives a movie with positive sentiment
     def positiveSentiment(self):

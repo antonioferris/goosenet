@@ -149,6 +149,13 @@ class Chatbot:
             self.params = {'title_list' : title_list, 'misspelled' : misspelled}
             return self.goose.disambiguationDialogue(misspelled).format( '\n'.join([self.title_text(i) for i in title_list]))
 
+    def update_multiple_preferences(self, title_sents):
+        for title_id, sent in title_sents:
+            self.sentiment = sent
+            response = update_with_preferences(title_list)
+        return response
+
+
     def update_with_preferences(self, title_list):
         sentiment = self.sentiment_rating
         title_text = self.title_text(title_list[0])
@@ -185,6 +192,17 @@ class Chatbot:
                 # If we found no titles, we go to a general dialogue
                 return self.goose.noQuotedTitlesFoundDialogue(line)
             if len(titles) > 1:
+                # Check if both titles are specific.
+                all_specific = True
+                for title in titles:
+                    if len(self.find_movies_by_title(title)) != 1:
+                        all_specific = False
+                        break
+                if all_specific: #multiple specific titles are present and work well
+                    title_sents = self.extract_sentiment_for_movies(line)
+                    title_sents = [(self.self.find_movies_by_title(title), sent) for title, sent in title_sents]
+                    return self.update_multiple_preferences(title_sents)
+
                 
             title_list = self.find_movies_by_title(titles[0])
         
