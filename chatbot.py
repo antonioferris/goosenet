@@ -103,13 +103,7 @@ class Chatbot:
     # 2. Modules 2 and 3: extraction and transformation                           #
     ###############################################################################
 
-    def get_subjects(self, line):
-        """
-        Returns a list of subjects detected in a sentence or an empty list if none
-        """
-        
-        words = [ i[0] for i in line if 'N' in i[1]] 
-        return words
+
 
     def title_text(self, i):
             title_str = self.titles[i][0]
@@ -121,9 +115,6 @@ class Chatbot:
                     title_str = a + ' ' + title_str[:-len(a)-2]
             return title_str
 
-    def question_process(self, line, tagged_tokens):
-        subjects = self.get_subjects(tagged_tokens)
-        return "HONK HONK I KNOW ALL about {}. BUT DONT TELL.".format(subjects[0])
 
     def recommendation_flow(self, line, rec, i):
         # First, we check if the user wanted another recommendation!
@@ -191,7 +182,7 @@ class Chatbot:
             titles = self.extract_titles(line)
             if not titles:
                 # If we found no titles, we go to a general dialogue
-                return self.goose.noQuotedTitlesFoundDialogue()
+                return self.goose.noQuotedTitlesFoundDialogue(line)
             title_list = self.find_movies_by_title(titles[0])
         
         # Otherwise, we already have a title_list and might be trying to disambiguate it
@@ -203,7 +194,7 @@ class Chatbot:
         elif len(title_list) == 0:
             possible_titles = self.find_movies_closest_to_title(titles[0])
             if len(possible_titles) == 0:
-                return self.goose.noTitlesIdentified(line)
+                return self.goose.noTitlesIdentified()
             else:
                 self.params = {'title_list' : title_list, 'misspelled' : True}
                 self.curr_func = self.disambiguate_flow
