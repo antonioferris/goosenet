@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 '''
     This module is used to store different goosenet responses
     and other functions having to do with goosenet dialogue
@@ -220,3 +221,5 @@ class Goose:
 
     def doneRecommendingDialogue(self):
         return "The Goose is done with you!  Take the hint and HONK! get lost."
+=======
+>>>>>>> 926e62c1b619c3e68b4a8d92d82867cacec239bf
