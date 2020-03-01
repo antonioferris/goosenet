@@ -109,9 +109,9 @@ class Goose:
             return "HONK!" * self.honk_num + " What movie are you referring to? Give me the year or some distinct part of the movie name. Please clarify, because you might have meant any of:\n{}"
 
     def finalMovieDialogue(self):
-        return """Now that I know how you felt about {}, I have enough information to perfectly predict the rest of your life.  
-        I could tell you how you die (no geese are involved, but a feather duster and legos are).  
-        Instead I'm just going to recommend you a movie."""
+        return """Now that I know how you felt about {}, 
+        I have enough information to perfectly predict the rest of your life.  
+        I could tell you how you die.  Instead I'm just going to recommend you a movie."""
 
     def indexDisambiguationDialogue(self):
         return "Well now you've done it. You need to be actually specific. Please just type the number of the movie you want\n{}"
