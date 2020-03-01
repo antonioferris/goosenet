@@ -339,6 +339,7 @@ class Chatbot:
         """
         Stems the string and returns it stemmed
         """
+        preprocessed_input += " lots" #this is jank but
         p = PorterStemmer()
         output, word = '', ''
         for c in preprocessed_input:
@@ -435,7 +436,7 @@ class Chatbot:
         
         return previous_row[-1]
     
-    def get_previous_sentiment(self, pieces, i):
+    def get_previous_sentiment(self, sentiment, pieces, i):
         """
         Recursively finds the move sentiment for a certain film by looking at the sentiment
         of the previous phrase. For example: "I liked both "I, Robot" and "Ex Machina"."
@@ -447,9 +448,9 @@ class Chatbot:
         if sentiment != 0:
             return sentiment
         elif sentiment == 0 and "not" in pieces[i]:
-            return -get_previous_sentiment(sentiment, i - 1)
+            return -self.get_previous_sentiment(sentiment, pieces, i - 1)
         else:
-            return get_previous_sentiment(sentiment, i - 1)
+            return self.get_previous_sentiment(sentiment, pieces, i - 1)
 
     def extract_sentiment_for_movies(self, preprocessed_input):
         """Creative Feature: Extracts the sentiments from a line of pre-processed text
@@ -469,15 +470,21 @@ class Chatbot:
           and the second is the sentiment in the text toward that movie
         """
         result = []
-        conj_pat = re.compile('".+"(.and |.but |.for |.nor |.or |.so |.yet )".+"')
-        match = conj_pat.findall(preprocessed_input)
-        pieces = preprocessed_input.split(match[0]) #split on the first conjunction
-
         titles = self.extract_titles(preprocessed_input)
-        for i in range(len(pieces)):
-            sentiment = self.extract_sentiment(pieces[i])
+
+        preprocessed_input_copy = preprocessed_input
+        chunks = []
+        for title in titles:
+            i = preprocessed_input.find(title)
+            chunks.append(preprocessed_input_copy[0: i+len(title)+1])
+            preprocessed_input_copy = preprocessed_input_copy[i+len(title)+1: len(preprocessed_input_copy)]
+        print("chunks: ")
+        print(chunks)
+
+        for i in range(len(chunks)):
+            sentiment = self.extract_sentiment(chunks[i])
             if sentiment == 0: #if no sentiment :/
-                sentiment = get_previous_sentiment()
+                sentiment = self.get_previous_sentiment(sentiment, chunks, i)
             result.append((titles[i], sentiment))
         return result
 

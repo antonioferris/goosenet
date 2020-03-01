@@ -18,8 +18,10 @@ class Goose:
         self.prev_line = ""
         #favorite goose movies
         # these need to be formated like that acutal movies still
-        self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies"]
+
         self.greeting_words = ["hello", "hi", "greetings", "howdy", "hey", "what's up"]
+        self.goose_movies = ["Father Goose", "Terminator 1", "Terminator 2", "Terminator 3", "Alien", "Lord of the Flies", "Braveheart"]
+
 
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor

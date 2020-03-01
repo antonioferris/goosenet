@@ -165,6 +165,18 @@ def test_extract_sentiment():
             chatbot.extract_sentiment(chatbot.preprocess("I liked \"Easy A\".")),
             1,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I liked \"Easy A\"\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("\"Easy A\" I hate.")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'\"Easy A\" I hate.\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I hated \"Easy A\".")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I hated \"Easy A\".\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("This movie, \"Easy A\", is really bad.")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'This movie, \"Easy A\", is really bad.\'))"
     ):
         print('extract_sentiment() sanity check passed!')
     print()
@@ -184,6 +196,18 @@ def test_extract_sentiment_for_movies():
         [("I, Robot", 1), ("Ex Machina", -1)],
         "Incorrect output for test_extract_sentiment_for_movies("
         "chatbot.preprocess(\"I liked \"I, Robot\" but not \"Ex Machina\".))\"",
+        orderMatters=False
+    ) and assertListEquals(
+        chatbot.extract_sentiment_for_movies(chatbot.preprocess("I liked \"I, Robot\", \"Ex Machina\", and \"Braveheart\".")),
+        [("I, Robot", 1), ("Ex Machina", 1), ("Braveheart", 1)],
+        "Incorrect output for test_extract_sentiment_for_movies("
+        "chatbot.preprocess(\"I liked \"I, Robot\", \"Ex Machina\", and \"Braveheart\".))\"",
+        orderMatters=False
+    ) and assertListEquals(
+        chatbot.extract_sentiment_for_movies(chatbot.preprocess("I hated \"I, Robot\", \"Ex Machina\", and \"Braveheart\".")),
+        [("I, Robot", -1), ("Ex Machina", -1), ("Braveheart", -1)],
+        "Incorrect output for test_extract_sentiment_for_movies("
+        "chatbot.preprocess(\"I hated \"I, Robot\", \"Ex Machina\", and \"Braveheart\".))\"",
         orderMatters=False
     ):
         print('extract_sentiment_for_movies() sanity check passed!')
@@ -282,6 +306,9 @@ def main():
     testing_creative = args.creative
 
     test_extract_titles()
+
+    test_extract_sentiment_for_movies() ##deleteeeee
+
     test_find_movies_by_title()
     test_extract_sentiment()
     test_recommend()
