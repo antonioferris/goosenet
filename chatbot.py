@@ -853,7 +853,7 @@ class Goose:
         self.goose_emotion = 0
         #self. -1 * self.goose_ = self.goose_emotion
         self.prev_line = ""
-        self.anger_cap = -10
+        self.anger_cap = -4
         self.last_chance = False
        
         # these need to be formated like that acutal movies still
@@ -936,7 +936,7 @@ class Goose:
     def execute_order_66(self):
         self.last_chance = True
  
-        if self.extract_sentiment(self.prev_line) >= 1 and self.goose_emotion > -10:
+        if self.extract_sentiment(self.prev_line) >= 1 and self.goose_emotion > -4:
             self.last_chance = False
             return "You have appeased me. For now..."
         if self.last_chance:
@@ -965,18 +965,18 @@ class Goose:
         " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
         " Are my world ending plans really worth talking to silly human like you",
         " HONK! " * (-1 * self.goose_emotion) + " LEAVE ME ALONE HONK",
-        " I " + random.choice(self.neg_words) + "  you!" 
+        " I " + random.choice(self.neg_words) + " you!" 
         ]
         #resoonses if goose is happy
         goose_response[1] = [ 
         "You know human, I might have to keep you alive when this is all over.",
-        " I " + random.choice(self.pos_words) + "  you!" 
+        " I " + random.choice(self.pos_words) + " you!" 
         ]
         # These are kinda magic and arbitrary number to cap anger/ happyness
         if self.goose_emotion > 10:
             self.goose_emotion = 10
-        elif self.goose_emotion < -10:
-            self.goose_emotion = -10
+        elif self.goose_emotion < -4:
+            self.goose_emotion = -4
 
         if emotion >  0:
             return random.choice(goose_response[1])
