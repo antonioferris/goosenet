@@ -29,11 +29,6 @@ class Chatbot:
 
         self.creative = creative
 
-        # install the punkt library for nltk for tagging tokens
-        nltk.download('punkt')
-        # used to get the part of speech of words
-        nltk.download('averaged_perceptron_tagger')
-
         # This matrix has the following shape: num_movies x num_users
         # The values stored in each row i and column j is the rating for
         # movie i by user j
@@ -467,7 +462,7 @@ class Chatbot:
         PUNCT_RE = re.compile(PUNCT)
 
         intense_words = {'love', 'hate', 'terribl', 'great', 'excel'}
-        INTENSIFIER = r"""^(?:re+ally|rea+lly|su+per)$"""
+        INTENSIFIER = r"""^(?:re+alli|rea+lli|su+pe?r?)$"""
         INTENSIFIER_RE = re.compile(INTENSIFIER)
 
         input_sentiment = 0
@@ -571,8 +566,6 @@ class Chatbot:
             i = preprocessed_input.find(title)
             chunks.append(preprocessed_input_copy[0: i+len(title)+1])
             preprocessed_input_copy = preprocessed_input_copy[i+len(title)+1: len(preprocessed_input_copy)]
-        print("chunks: ")
-        print(chunks)
 
         for i in range(len(chunks)):
             sentiment = self.extract_sentiment(chunks[i])

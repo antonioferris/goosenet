@@ -142,6 +142,18 @@ def test_extract_sentiment():
             1,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I like \"Titanic (1997)\".\'))"
     ) and assertEquals(
+        chatbot.extract_sentiment(chatbot.preprocess("I loved \"Zootopia\"")),
+        2,
+        "Incorrect output for extract_sentiment(chatbot.preprocess(\'I loved \"Zootopia\"\'))"
+    ) and assertEquals(
+        chatbot.extract_sentiment(chatbot.preprocess("\"Zootopia\" was terrible.")),
+        -2,
+        "Incorrect output for extract_sentiment(chatbot.preprocess(\'\"Zootopia\" was terrible.\'))"
+    ) and assertEquals(
+        chatbot.extract_sentiment(chatbot.preprocess("I really reeally liked \"Zootopia\"!!!")),
+        2,
+        "Incorrect output for extract_sentiment(chatbot.preprocess(\'I really reeally liked \"Zootopia\"!!!\'))"
+    ) and assertEquals(
         chatbot.extract_sentiment(chatbot.preprocess("I saw \"Titanic (1997)\".")),
         0,
         "Incorrect output for extract_sentiment(chatbot.preprocess(\'I saw  \"Titanic (1997)\".\'))"
@@ -151,7 +163,7 @@ def test_extract_sentiment():
         "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't enjoy \"Titanic (1997)\"\'.))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I loved \"10 Things I Hate About You\".")),
-            1,
+            2,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I loved \"10 Things I Hate About You\"\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I liked \"She's the Man\".")),
@@ -167,19 +179,19 @@ def test_extract_sentiment():
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I liked \"Easy A\"\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("\"Easy A\" is a movie I hate.")),
-            -1,
+            -2,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'\"Easy A\" is a movie I hate.\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I hated \"Easy A\".")),
-            -1,
+            -2,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I hated \"Easy A\".\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("This movie, \"Easy A\", is really bad.")),
-            -1,
+            -2,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'This movie, \"Easy A\", is really bad.\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("\"Titanic (1997)\" started out terrible, but the ending was totally great and I loved it!")),
-            1,
+            2,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'\"Titanic (1997)\" started out terrible, but the ending was totally great and I loved it!\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I didn't really like \"Titanic (1997)\".")),
@@ -199,11 +211,11 @@ def test_extract_sentiment():
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I don't think I really enjoyed \"Titanic (1997)\".\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I don't think I enjoyed \"Titanic (1997)\" because the plot was really bad and the acting was terrible.")),
-            -1,
+            -2,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I don't think I enjoyed \"Titanic (1997)\" because the plot was really bad and the acting was terrible.\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I didn't like \"Titanic (1997)\" at the beginning, but at the end I thought it was great and really amazing.")),
-            1,
+            2,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't like \"Titanic (1997)\" at the beginning, but at the end I thought it was great and really amazing.\'))"
     ):
         print('extract_sentiment() sanity check passed!')
@@ -233,7 +245,7 @@ def test_extract_sentiment_for_movies():
         orderMatters=False
     ) and assertListEquals(
         chatbot.extract_sentiment_for_movies(chatbot.preprocess("I hated \"I, Robot\", \"Ex Machina\", and \"Braveheart\".")),
-        [("I, Robot", -1), ("Ex Machina", -1), ("Braveheart", -1)],
+        [("I, Robot", -2), ("Ex Machina", -2), ("Braveheart", -2)],
         "Incorrect output for test_extract_sentiment_for_movies("
         "chatbot.preprocess(\"I hated \"I, Robot\", \"Ex Machina\", and \"Braveheart\".))\"",
         orderMatters=False
