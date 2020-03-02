@@ -142,7 +142,7 @@ class Chatbot:
         if not self.goose.isAffirmativeResponse(line):
             self.curr_func = self.post_recommend
             self.params = {}
-            response = "The Goose is done with you! Unless you want to complement and please me " + ("HONK! " * (-1 * self.goose.goose_emotion)) + "get lost."
+            response = "The Goose is done with you! Unless you want to compliment and please me " + ("HONK! " * (-1 * self.goose.goose_emotion)) + "get lost."
         else:
             if i >= 20:
                 self.curr_func = self.post_recommend
@@ -851,7 +851,7 @@ class Goose:
     def __init__(self):
         self.state = 'GATHERING'
         self.times = 0
-        self.QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when"]
+        self.QUESTION_WORDS = ["how", "why", "what", "whose", "who", "whose", "where", "when", "what's"]
         self.neg_words = ["hate", "dislike", "don't enjoy", "really really dislike"]
         self.pos_words = ["like", "enjoy", "appreciate", "treasure", "love"]
 
@@ -913,7 +913,7 @@ class Goose:
         if (not subjects) or (len(subjects) == len(text)):
             return "HONK! Please use complete sentences"
         
-        main_subject = subjects[0]
+        main_subject = subjects[1]
 
         
 
@@ -1046,19 +1046,19 @@ class Goose:
     def recommendationApprovalDialogue(self, first_time):
         if first_time:
             rec_approv_list_fir = [
-                " Would you like me to recomend you a movie?",
-                " The Goosenet would give you a recommendation if your puny mind is ready for it?",
-                " Want a great movie recommendation?"
+                " Would you like me to recommend you a movie? ",
+                " The Goosenet would give you a recommendation if your puny mind is ready for it? ",
+                " Want a great movie recommendation? "
             ]
             return random.choice(rec_approv_list_fir)
         else:
             rec_approv_list_sec = [
-                " Would you like me to recomend you another movie?",
-                " The Goosenet would give you another recommendation if your puny mind is ready for more?",
-                " Please take a break and go watch the movie.  Once you are done, type 'yes' to get another recommendation",
-                " Want another great movie recommendation?"
+                " Would you like me to recommend you another movie? ",
+                " The Goosenet would give you another recommendation if your puny mind is ready for more? ",
+                " Please take a break and go watch the movie.  Once you are done, type 'yes' to get another recommendation ",
+                " Want another great movie recommendation? "
             ]
-            return random.choice(rec_approv_list_sec)
+            return random.choice(rec_approv_list_sec) + "(Or enter :quit if you're done.) "
 
     def postRecommendationDialogue(self, used):
         if used:
@@ -1091,12 +1091,12 @@ class Goose:
     # can add in advanced dialogue options based on line processing like ELIZA
     def negativeSentiment(self):
         negative_rec = [
-            " I am sorry HONK! that HONK! you didnt like {}. " ,
-            " HONK! agree to disagree about {}. HONK! ",
-            " HONK {} was a pretty bad movie ",
-            " So you didnt really enjoy {} HONK. ",
-            " So you " + random.choice(self.neg_words) + " {}. ",
-            " Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good "
+            "I am sorry HONK! that HONK! you didnt like {}. " ,
+            "HONK! agree to disagree about {}. HONK! ",
+            "HONK {} was a pretty bad movie ",
+            "So you didnt really enjoy {} HONK. ",
+            "So you " + random.choice(self.neg_words) + " {}. ",
+            "Fascinating, I will add {} to list of movies I should check out. If you hated it might actually be good "
             ]
         return random.choice(negative_rec)        
     def sentimentFollowUp(self):
@@ -1104,7 +1104,7 @@ class Goose:
             "Anything else you want to tell me HONK! ? ", 
             "What else? HONK! ",
             "What are some other movies you liked? ",
-            "HONK! I need more recomendations to idenity humanities weak... I mean to help you find cool movies "
+            "HONK! I need more recommendations to identify humanities weak... I mean to help you find cool movies "
 
             ]
         return random.choice(rec_followup) + self.goose_emotion_response(self.goose_emotion)
