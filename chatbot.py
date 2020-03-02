@@ -907,7 +907,7 @@ class Goose:
         subjects, verbs, pronouns = self.get_subjects(tagged_tokens)
         #print("subjects:" )
         #print(subjects)
-        if (not subjects) or (len(subjects) == len(text) or (subjects[0] == "i" and len(subjects) == 1 )):
+        if (not subjects) or (len(subjects) == len(text) or (subjects[0] == "i" and (len(subjects) + len(pronouns)) == 1 )):
             return "HONK! I didnt get what you were trying to say."
         
         main_subject = subjects[len(subjects) - 1]
@@ -980,7 +980,10 @@ class Goose:
         #resoonses if goose is happy
         goose_response[1] = [ 
         "You know human, I might have to keep you alive when this is all over.",
-        " I " + random.choice(self.pos_words) + " you!" 
+        "I " + random.choice(self.pos_words) + " you!",
+        "You are like bread. I like bread. ",
+        "You are a good conversation partner!",
+        "Can a goose and human be friends? No, but you can be my servant." 
         ]
         # These are kinda magic and arbitrary number to cap anger/ happyness
         if self.goose_emotion > 10:
@@ -1102,7 +1105,7 @@ class Goose:
             "Anything else you want to tell me HONK! ? ", 
             "What else? HONK! ",
             "What are some other movies you liked? ",
-            "HONK! I need more recommendations to identify humanities weak... I mean to help you find cool movies "
+            "HONK! I need more recommendations to identify humanities weak... I mean to help you find cool movies. "
 
             ]
         return random.choice(rec_followup) + self.goose_emotion_response(self.goose_emotion)
