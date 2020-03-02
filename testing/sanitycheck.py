@@ -148,11 +148,11 @@ def test_extract_sentiment():
     ) and assertEquals(
         chatbot.extract_sentiment(chatbot.preprocess("I didn't enjoy \"Titanic (1997)\".")),
         -1,
-        "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't enjoy  \"Titanic (1997)\"\'.))"
+        "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't enjoy \"Titanic (1997)\"\'.))"
     ) and assertEquals(
-            chatbot.extract_sentiment(chatbot.preprocess("I liked \"10 Things I Hate About You\".")),
+            chatbot.extract_sentiment(chatbot.preprocess("I loved \"10 Things I Hate About You\".")),
             1,
-            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I liked \"10 Things I Hate About You\"\'))"
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I loved \"10 Things I Hate About You\"\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I liked \"She's the Man\".")),
             1,
@@ -166,9 +166,9 @@ def test_extract_sentiment():
             1,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I liked \"Easy A\"\'))"
     ) and assertEquals(
-            chatbot.extract_sentiment(chatbot.preprocess("\"Easy A\" I hate.")),
+            chatbot.extract_sentiment(chatbot.preprocess("\"Easy A\" is a movie I hate.")),
             -1,
-            "Incorrect output for extract_sentiment(chatbot.preprocess(\'\"Easy A\" I hate.\'))"
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'\"Easy A\" is a movie I hate.\'))"
     ) and assertEquals(
             chatbot.extract_sentiment(chatbot.preprocess("I hated \"Easy A\".")),
             -1,
@@ -185,6 +185,30 @@ def test_extract_sentiment():
             chatbot.extract_sentiment(chatbot.preprocess("I didn't really like \"Titanic (1997)\".")),
             -1,
             "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't really like \"Titanic (1997)\".\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I never liked \"Titanic (1997)\".")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I never liked \"Titanic (1997)\".\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I really enjoyed \"Titanic (1997)\".")),
+            1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I really enjoyed \"Titanic (1997)\".\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I don't think I really enjoyed \"Titanic (1997)\".")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I don't think I really enjoyed \"Titanic (1997)\".\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I don't think I enjoyed \"Titanic (1997)\" because the plot was really bad and the acting was terrible.")),
+            -1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I don't think I enjoyed \"Titanic (1997)\" because the plot was really bad and the acting was terrible.\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I didn't like \"Titanic (1997)\" at the beginning, but at the end I thought it was great and really amazing.")),
+            1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't like \"Titanic (1997)\" at the beginning, but at the end I thought it was great and really amazing.\'))"
+    ) and assertEquals(
+            chatbot.extract_sentiment(chatbot.preprocess("I didn't not like \"Titanic (1997)\" - it was actually pretty good.")),
+            1,
+            "Incorrect output for extract_sentiment(chatbot.preprocess(\'I didn't not like \"Titanic (1997)\" - it was actually pretty good.\'))"
     ):
         print('extract_sentiment() sanity check passed!')
     print()
@@ -327,6 +351,8 @@ def main():
 
     args = parser.parse_args()
     testing_creative = args.creative
+
+    test_extract_sentiment() ##deleteee
 
     test_extract_titles()
     test_find_movies_by_title()
