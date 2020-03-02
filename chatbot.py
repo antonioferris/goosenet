@@ -935,7 +935,7 @@ class Goose:
 
         
         
-        return "HONK! I havent collected enough data yet to converse on " + main_subject + ". You should talk about movies"
+        return "HONK! I havent collected enough data yet to converse on " + main_subject + "."
 
     def noTitlesIdentified(self):
         self.goose_emotion -= 1
