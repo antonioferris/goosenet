@@ -29,11 +29,6 @@ class Chatbot:
 
         self.creative = creative
 
-        # install the punkt library for nltk for tagging tokens
-        nltk.download('punkt')
-        # used to get the part of speech of words
-        nltk.download('averaged_perceptron_tagger')
-
         # This matrix has the following shape: num_movies x num_users
         # The values stored in each row i and column j is the rating for
         # movie i by user j
@@ -173,7 +168,7 @@ class Chatbot:
     def update_multiple_preferences(self, title_sents):
         response = ''
         for title_id, sent in title_sents:
-            self.sentiment = sent
+            self.sentiment_rating = sent
             response += ' ' + self.update_with_preferences([title_id])
             if self.times >= 5:
                 break
@@ -235,7 +230,6 @@ class Chatbot:
                         all_specific = False
                         break
                 if all_specific: #multiple specific titles are present and work well
-                    print('Attempting multiple movies at once!')
                     title_sents = self.extract_sentiment_for_movies(line)
                     title_sents = [(self.find_movies_by_title(title)[0], sent) for title, sent in title_sents]
                     return self.update_multiple_preferences(title_sents)
@@ -257,7 +251,10 @@ class Chatbot:
                 self.params = {'title_list' : title_list, 'misspelled' : True}
                 self.curr_func = self.disambiguate_flow
                 return self.goose.disambiguationDialogue(True).format('\n'.join([self.title_text(i) for i in title_list]))
-        return self.update_with_preferences(title_list) + self.goose.sentimentFollowUp()
+        response = self.update_with_preferences(title_list)
+        if self.times < 5:
+            response += self.goose.sentimentFollowUp()
+        return response
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -467,7 +464,7 @@ class Chatbot:
         PUNCT_RE = re.compile(PUNCT)
 
         intense_words = {'love', 'hate', 'terribl', 'great', 'excel'}
-        INTENSIFIER = r"""^(?:re+ally|rea+lly|su+per)$"""
+        INTENSIFIER = r"""^(?:re+alli|rea+lli|su+pe?r?)$"""
         INTENSIFIER_RE = re.compile(INTENSIFIER)
 
         input_sentiment = 0
@@ -571,8 +568,6 @@ class Chatbot:
             i = preprocessed_input.find(title)
             chunks.append(preprocessed_input_copy[0: i+len(title)+1])
             preprocessed_input_copy = preprocessed_input_copy[i+len(title)+1: len(preprocessed_input_copy)]
-        print("chunks: ")
-        print(chunks)
 
         for i in range(len(chunks)):
             sentiment = self.extract_sentiment(chunks[i])
@@ -631,6 +626,7 @@ class Chatbot:
         :returns: a list of indices corresponding to the movies identified by the clarification
         """
         year_regex = re.compile('\(([0-9]{4})\)')
+        clarification = clarification.strip('.;:?!')
         def remains_valid(title):
             title_text = self.titles[title][0]
             movie_year = year_regex.findall(title_text)
