@@ -455,30 +455,44 @@ class Chatbot:
         PUNCT = r"""[,.:;!?]"""
         PUNCT_RE = re.compile(PUNCT)
 
+        intense_words = {'love', 'hate', 'terribl', 'great', 'excel'}
+        INTENSIFIER = r"""^(?:re+ally|rea+lly|su+per)$"""
+        INTENSIFIER_RE = re.compile(INTENSIFIER)
+
         input_sentiment = 0
         tag_neg = False
 
         for i in range(len(preprocessed_input)):
-            if NEGATION_RE.search(preprocessed_input[i]):
+            word = preprocessed_input[i]
+            print(word, end='|')
+            if NEGATION_RE.search(word):
                 tag_neg = True
-            elif PUNCT_RE.search(preprocessed_input[i]) or preprocessed_input[i] == "becaus":
+            elif PUNCT_RE.search(word) or word == "becaus":
                 tag_neg = False
-
+            word = word.strip('.,;:!')
             delta = 0
-            word_sentiment = self.sentiment.get(preprocessed_input[i], '') # default to empty string
+            word_sentiment = self.sentiment.get(word, '') # default to empty string
             if word_sentiment == 'pos' or word_sentiment == 'po': #'po' is the stemmed version
                 delta = 1
             elif word_sentiment == 'neg':
                 delta = -1
             if tag_neg:
                 delta *= -1
+            if i > 0 and INTENSIFIER_RE.search(preprocessed_input[i-1]):
+                delta *= 2
+            elif word in intense_words:
+                delta *= 2
 
             input_sentiment += delta
 
         if input_sentiment == 0:
             return 0
+        elif input_sentiment < -1:
+            return -2
         elif input_sentiment < 0:
             return -1
+        elif input_sentiment > 1:
+            return 2
         else:
             return 1
 
