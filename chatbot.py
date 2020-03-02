@@ -201,7 +201,7 @@ class Chatbot:
         else:
             self.params = {}
             self.curr_func = self.acquire_movie_preferences
-        # I dont want to do this but its being done ***
+        
 
         #print("RIGTHE BEFORE CHECK")
         if self.goose.goose_emotion >= self.goose.anger_cap or self.goose.last_chance:
@@ -922,7 +922,7 @@ class Goose:
     def execute_order_66(self):
         self.last_chance = True
  
-        if self.extract_sentiment(self.prev_line) == 1:
+        if self.extract_sentiment(self.prev_line) == 1 and self.goose_emotion > -10:
             self.last_chance = False
             return "You have appeased me. For now..."
         if self.last_chance:
