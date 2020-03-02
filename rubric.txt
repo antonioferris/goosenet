@@ -45,7 +45,9 @@ Colin:
     Tied together ecery other function like (extract_movies, recommend) together with dialogue for the user
     Added lots of dialogue options and randomness to make every conversation feel unique
     Added references to Goose Net through HONK!s and the insidious world takeover
-    added prompts for US military base locations
+    Added Goose emotional system
+    Gave Goose some basic information to respond to extraneous input with.
+    Continued to expand Goose Dialogue
 Noah:
     Debugged buggy extract_sentiment code written by Antonio :)
     Changed sentiment.txt to reflect the porter-stemmed words from PorterStemmer
@@ -61,10 +63,14 @@ Noah:
 # implementation!# 
 The goose has a limited knowledge base about itself and can detect when the user asks questions about itself.
 The goose can respond what its name is. For example asking "What is your name" has the goose respond Well, my name is Reginald.
-It also detects when you are talking about it. If you say I hate you Goosenet! Goosenet will not be happy.
+The goose has a simple emotional state ranging from pleased to angry which is represented by the range of numbers
+10 to -10.
+It also detects when you are talking about it. If you say I hate you Goosenet! Goosenet will become more angry.
 It also will respond to basic greetings like hi! or hello!
-If the goose detects neagtive sentiment when it believes you talking about it. Or a subject it either cares about it will not be happy
 The goose also has some favorite movies, disliking movies like "Father Goose" will make the goose angry
+while liking "Father Goose" will make it happy!
+If the goose becomes too angry it wil give the user a chance to say something nice about it,
+otherwise it will forcefully exit the program.
 #########################################################################################
 
 

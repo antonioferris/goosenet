@@ -201,6 +201,12 @@ class Chatbot:
         else:
             self.params = {}
             self.curr_func = self.acquire_movie_preferences
+        
+
+        #print("RIGTHE BEFORE CHECK")
+        if self.goose.goose_emotion >= self.goose.anger_cap or self.goose.last_chance:
+            #print ("Got to order")
+            return self.goose.execute_order_66()
         return response
 
     def post_recommend(self, line):
@@ -455,30 +461,44 @@ class Chatbot:
         PUNCT = r"""[,.:;!?]"""
         PUNCT_RE = re.compile(PUNCT)
 
+        intense_words = {'love', 'hate', 'terribl', 'great', 'excel'}
+        INTENSIFIER = r"""^(?:re+ally|rea+lly|su+per)$"""
+        INTENSIFIER_RE = re.compile(INTENSIFIER)
+
         input_sentiment = 0
         tag_neg = False
 
         for i in range(len(preprocessed_input)):
-            if NEGATION_RE.search(preprocessed_input[i]):
+            word = preprocessed_input[i]
+            print(word, end='|')
+            if NEGATION_RE.search(word):
                 tag_neg = True
-            elif PUNCT_RE.search(preprocessed_input[i]) or preprocessed_input[i] == "becaus":
+            elif PUNCT_RE.search(word) or word == "becaus":
                 tag_neg = False
-
+            word = word.strip('.,;:!')
             delta = 0
-            word_sentiment = self.sentiment.get(preprocessed_input[i], '') # default to empty string
+            word_sentiment = self.sentiment.get(word, '') # default to empty string
             if word_sentiment == 'pos' or word_sentiment == 'po': #'po' is the stemmed version
                 delta = 1
             elif word_sentiment == 'neg':
                 delta = -1
             if tag_neg:
                 delta *= -1
+            if i > 0 and INTENSIFIER_RE.search(preprocessed_input[i-1]):
+                delta *= 2
+            elif word in intense_words:
+                delta *= 2
 
             input_sentiment += delta
 
         if input_sentiment == 0:
             return 0
+        elif input_sentiment < -1:
+            return -2
         elif input_sentiment < 0:
             return -1
+        elif input_sentiment > 1:
+            return 2
         else:
             return 1
 
@@ -810,6 +830,7 @@ class Chatbot:
         Consider adding to this description any information about what your chatbot
         can do and how the user can interact with it.
         """
+
         return """
         This is goosenet. Goosenet is an intelligent goose who secretly want to destroy the world by gathering
         information through movie reccomendations. Goosenet has a bit of personality so be careful! Especally in what information you tell it.
@@ -818,6 +839,7 @@ class Chatbot:
 '''
     This module is used to store different goosenet responses
     and other functions having to do with goosenet dialogue
+    as well as manage the gooses internal emotional state
 '''
 
 class Goose:
@@ -831,6 +853,8 @@ class Goose:
         self.goose_emotion = 0
         #self. -1 * self.goose_ = self.goose_emotion
         self.prev_line = ""
+        self.anger_cap = -10
+        self.last_chance = False
        
         # these need to be formated like that acutal movies still
 
@@ -841,7 +865,8 @@ class Goose:
 
 
         # Ideally the dictionary is populated with response making it easy to add emotional flavor
-        # To any text    
+        # To any text
+
 
 
 
@@ -889,7 +914,7 @@ class Goose:
         sentiment = self.extract_sentiment(line)
         if is_goose_subject and sentiment:
             if sentiment == -1:
-                self.goose_emotion -= 1
+                self.goose_emotion -= 1 # the dialogue here needs work
                 return "Want to be mean to me? Buckle up ducko because HONK! I will be mad at you until you say something nice to me."
             else:
                 self.goose_emotion += 1
@@ -906,7 +931,19 @@ class Goose:
 
     def noTitlesIdentified(self):
 
-        return "HONK HONK TODO NO TITLES IDENTFIED"
+        return "HONK HONK TODO NO  TODO TODO TODO TODO TODO TODO TODO TODO TODO TITLES IDENTFIED"
+
+    def execute_order_66(self):
+        self.last_chance = True
+ 
+        if self.extract_sentiment(self.prev_line) == 1 and self.goose_emotion > -10:
+            self.last_chance = False
+            return "You have appeased me. For now..."
+        if self.last_chance:
+            print("THATS IT HONK BYE!")
+            exit()
+        
+        return "I AM AT THE LIMIT OF MY PATIENCE IF YOU DONT SAY SOMETHING NICE ABOUT ME I WILL LEAVE"
 
     def goose_fav_movie(self, movie, sentiment):
         if sentiment > 0:
@@ -921,17 +958,26 @@ class Goose:
 
     def goose_emotion_response(self, emotion):
         goose_response = {-1:[], 1:[], 0 :[""]}
+        #responses if goose is angry
         goose_response[-1] = [
         " HONK! I am losing my patience with you human.",
         " You have HONKIN bad taste puny human",
         " HONK After seeing your personality I think you would love The Last Airbender. Its a terrible movie just like you. HONK!",
         " Are my world ending plans really worth talking to silly human like you",
-        "HONK! " * (-1 * self.goose_emotion) + " LEAVE ME ALONE HONK"
+        " HONK! " * (-1 * self.goose_emotion) + " LEAVE ME ALONE HONK",
+        " I " + random.choice(self.neg_words) + "  you!" 
         ]
-
+        #resoonses if goose is happy
         goose_response[1] = [ 
-        "You know human, I might have to keep you alive when this is all over."
+        "You know human, I might have to keep you alive when this is all over.",
+        " I " + random.choice(self.pos_words) + "  you!" 
         ]
+        # These are kinda magic and arbitrary number to cap anger/ happyness
+        if self.goose_emotion > 10:
+            self.goose_emotion = 10
+        elif self.goose_emotion < -10:
+            self.goose_emotion = -10
+
         if emotion >  0:
             return random.choice(goose_response[1])
         elif emotion < 0:
