@@ -987,9 +987,20 @@ class Goose:
 
     def recommendationApprovalDialogue(self, first_time):
         if first_time:
-            return " Would you like me to recomend you a movie?"
+            rec_approv_list_fir = [
+                " Would you like me to recomend you a movie?",
+                " The Goosenet would give you a recommendation if your puny mind is ready for it?",
+                " Want a great movie recommendation?"
+            ]
+            return return random.choice(rec_approv_list_fir)
         else:
-            return " Would you like me to recomend you another movie?"
+            rec_approv_list_sec = [
+                " Would you like me to recomend you another movie?",
+                " The Goosenet would give you another recommendation if your puny mind is ready for more?",
+                " Please take a break and go watch the movie.  Once you are done, type 'yes' to get another recommendation",
+                " Want another great movie recommendation?"
+            ]
+            return return random.choice(rec_approv_list_sec)
 
     def postRecommendationDialogue(self, used):
         if used:
