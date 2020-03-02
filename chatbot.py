@@ -204,7 +204,7 @@ class Chatbot:
         
 
         #print("RIGTHE BEFORE CHECK")
-        if self.goose.goose_emotion >= self.goose.anger_cap or self.goose.last_chance:
+        if self.goose.goose_emotion <= self.goose.anger_cap or self.goose.last_chance:
             #print ("Got to order")
             return self.goose.execute_order_66()
         return response
@@ -899,7 +899,7 @@ class Goose:
         print( -1 * self.goose_emotion )
         sentiment = self.extract_sentiment(line)
         if is_goose_subject and sentiment:
-            if sentiment == -1:
+            if sentiment <= -1:
                 self.goose_emotion -= 1 # the dialogue here needs work
                 return "Want to be mean to me? Buckle up ducko because HONK! I will be mad at you until you say something nice to me."
             else:
@@ -922,7 +922,7 @@ class Goose:
     def execute_order_66(self):
         self.last_chance = True
  
-        if self.extract_sentiment(self.prev_line) == 1 and self.goose_emotion > -10:
+        if self.extract_sentiment(self.prev_line) >= 1 and self.goose_emotion > -10:
             self.last_chance = False
             return "You have appeased me. For now..."
         if self.last_chance:
