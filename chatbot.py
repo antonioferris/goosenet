@@ -1055,9 +1055,9 @@ class Goose:
         # To get more clairification about the movie that was already mentioned.
     def unknownSentiment(self):
         unknown = [
-        "HONK but how did you feel about {}?",
-        "I didnt catch how you felt about {}",
-        "HONK I need your emotions and feelings about {}"
+        "HONK but how did you feel about {}? Please compose a more informational sentence.",
+        "I didnt catch how you felt about {}.  You need to reiterate.",
+        "HONK I need your emotions and feelings about {}, not just random titles and words"
         ]
         return random.choice(unknown) #+ random.choice(self.goose_emotion_response[self.goose_emotion])
 
