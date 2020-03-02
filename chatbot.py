@@ -29,6 +29,11 @@ class Chatbot:
 
         self.creative = creative
 
+        # install the punkt library for nltk for tagging tokens
+        nltk.download('punkt')
+        # used to get the part of speech of words
+        nltk.download('averaged_perceptron_tagger')
+
         # This matrix has the following shape: num_movies x num_users
         # The values stored in each row i and column j is the rating for
         # movie i by user j
@@ -1038,7 +1043,7 @@ class Goose:
                 " The Goosenet would give you a recommendation if your puny mind is ready for it?",
                 " Want a great movie recommendation?"
             ]
-            return return random.choice(rec_approv_list_fir)
+            return random.choice(rec_approv_list_fir)
         else:
             rec_approv_list_sec = [
                 " Would you like me to recomend you another movie?",
@@ -1046,7 +1051,7 @@ class Goose:
                 " Please take a break and go watch the movie.  Once you are done, type 'yes' to get another recommendation",
                 " Want another great movie recommendation?"
             ]
-            return return random.choice(rec_approv_list_sec)
+            return random.choice(rec_approv_list_sec)
 
     def postRecommendationDialogue(self, used):
         if used:
