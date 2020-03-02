@@ -10,6 +10,7 @@ import re
 import random as r
 import collections
 from PorterStemmer import PorterStemmer
+import csv
 
 # noinspection PyMethodMayBeStatic
 class Chatbot:
@@ -32,7 +33,12 @@ class Chatbot:
         # The values stored in each row i and column j is the rating for
         # movie i by user j
         self.titles, ratings = movielens.ratings()
-        self.sentiment = movielens.sentiment()
+        # self.sentiment = movielens.sentiment()
+        self.stem_lexicon()
+
+        with open('./data/sentiment_stemmed.txt', 'r') as f:
+            reader = csv.reader(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
+            self.sentiment = dict(reader)
         self.vec = np.zeros(len(self.titles))
         #keeps track of how long user has talked to goosenet
         self.times = 0
@@ -385,7 +391,7 @@ class Chatbot:
         """
         Stems the string and returns it stemmed
         """
-        preprocessed_input += " lots" #this is jank but
+        preprocessed_input += " blah" #this is jank but
         p = PorterStemmer()
         output, word = '', ''
         for c in preprocessed_input:
@@ -406,8 +412,20 @@ class Chatbot:
         titles = self.extract_titles(preprocessed_input)
         for title in titles:
             preprocessed_input = preprocessed_input.replace(title, '')
-            preprocessed_input = preprocessed_input.replace("\"", '').strip('.')
+            preprocessed_input = preprocessed_input.replace("\"", '')     
         return preprocessed_input
+
+    def stem_lexicon(self):
+        """
+        Stems the lexicon by reading its contents and then writing over it
+        """
+        with open("data/sentiment.txt") as f:
+            data = f.read()
+
+        stemmed = self.get_stemmed(data).split('\n')
+
+        with open("data/sentiment_stemmed.txt", 'w') as file_to_write:
+            file_to_write.write('\n'.join(stemmed[:-1]))
 
     def extract_sentiment(self, preprocessed_input):
         """Extract a sentiment rating from a line of pre-processed text.
@@ -440,15 +458,25 @@ class Chatbot:
         n't"""
         NEGATION_RE = re.compile(NEGATION, re.VERBOSE)
 
+        PUNCT = r"""[,.:;!?]"""
+        PUNCT_RE = re.compile(PUNCT)
+
         input_sentiment = 0
+        tag_neg = False
+
         for i in range(len(preprocessed_input)):
+            if NEGATION_RE.search(preprocessed_input[i]):
+                tag_neg = True
+            elif PUNCT_RE.search(preprocessed_input[i]) or preprocessed_input[i] == "becaus":
+                tag_neg = False
+
             delta = 0
             word_sentiment = self.sentiment.get(preprocessed_input[i], '') # default to empty string
-            if word_sentiment == 'pos':
+            if word_sentiment == 'pos' or word_sentiment == 'po': #'po' is the stemmed version
                 delta = 1
             elif word_sentiment == 'neg':
                 delta = -1
-            if i > 0 and NEGATION_RE.search(preprocessed_input[i-1]):
+            if tag_neg:
                 delta *= -1
 
             input_sentiment += delta

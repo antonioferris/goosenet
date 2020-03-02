@@ -55,7 +55,6 @@ deplorable,neg
 straight,pos
 triumph,pos
 enjoy,pos
-enjoi,pos
 veritable,pos
 force,neg
 monotonous,neg
@@ -271,7 +270,6 @@ vouchsafe,pos
 press,neg
 enrich,pos
 unemployed,neg
-unemploi,neg
 amenable,pos
 collide,neg
 bane,neg
@@ -838,7 +836,6 @@ right,pos
 formidable,neg
 squander,neg
 annoyance,neg
-annoi,neg
 familiarize,pos
 deception,neg
 implore,neg
@@ -857,7 +854,6 @@ calm,pos
 questionable,neg
 starve,neg
 overjoyed,pos
-overjoi,pos
 immorality,neg
 fascination,pos
 heal,pos
@@ -1373,7 +1369,6 @@ wretch,neg
 fracture,neg
 objective,pos
 destroy,neg
-destroi,neg
 hedonistic,neg
 wonder,pos
 blunt,neg
@@ -1627,7 +1622,6 @@ overthrow,neg
 struck,neg
 disrupt,neg
 joyful,pos
-joi,pos
 disproportionate,neg
 real,pos
 exult,pos
@@ -2874,7 +2868,6 @@ unfaithful,neg
 rivalry,neg
 charity,pos
 annoy,neg
-annoi,neg
 disingenuous,neg
 augment,pos
 pout,neg
