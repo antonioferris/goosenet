@@ -191,12 +191,12 @@ class Chatbot:
         if sentiment > 0:
             # need to implement some sort of caching here.
             response = self.goose.positiveSentiment().format(title_text)
-            self.times += 1
         elif sentiment < 0:
             response = self.goose.negativeSentiment().format(title_text)
-            self.times += 1
         else:
             response = self.goose.unknownSentiment().format(title_text)
+        if sentiment != 0 and self.vec[title_list[0]] == 0:
+            self.times += 1
         self.vec[title_list[0]] = sentiment
         if self.times >= 5:
             rec = self.recommend(self.vec, self.binarized_ratings, k=20)
