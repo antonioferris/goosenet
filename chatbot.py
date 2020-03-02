@@ -156,7 +156,7 @@ class Chatbot:
         title_list = self.disambiguate(clarification, title_list)
         # If we are done, we go back to the get movie preferences function
         if len(title_list) == 1:
-            return self.update_with_preferences(title_list) + self.goose.sentimentFollowUp()
+            return self.update_with_preferences(title_list)
         elif len(title_list) == 0:
             self.params = {'title_list' : title_list}
             self.curr_func = self.acquire_movie_preferences
@@ -207,6 +207,9 @@ class Chatbot:
         if self.goose.goose_emotion <= self.goose.anger_cap or self.goose.last_chance:
             #print ("Got to order")
             return self.goose.execute_order_66()
+
+        if self.times < 5:
+            response += self.goose.sentimentFollowUp()
         return response
 
     def post_recommend(self, line):
@@ -252,8 +255,6 @@ class Chatbot:
                 self.curr_func = self.disambiguate_flow
                 return self.goose.disambiguationDialogue(True).format('\n'.join([self.title_text(i) for i in title_list]))
         response = self.update_with_preferences(title_list)
-        if self.times < 5:
-            response += self.goose.sentimentFollowUp()
         return response
 
     def process(self, line):
@@ -1042,9 +1043,9 @@ class Goose:
     def recommendationApprovalDialogue(self, first_time):
         if first_time:
             rec_approv_list_fir = [
-                " Would you like me to recommend you a movie? ",
-                " The Goosenet would give you a recommendation if your puny mind is ready for it? ",
-                " Want a great movie recommendation? "
+                "Would you like me to recommend you a movie? ",
+                "The Goosenet would give you a recommendation if your puny mind is ready for it? ",
+                "Want a great movie recommendation? "
             ]
             return random.choice(rec_approv_list_fir)
         else:
