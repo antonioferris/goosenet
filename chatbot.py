@@ -908,7 +908,7 @@ class Goose:
         #print("subjects:" )
         #print(subjects)
         if (not subjects) or (len(subjects) == len(text) or (subjects[0] == "i" and len(subjects) == 1 )):
-            return "HONK! Please use complete sentences"
+            return "HONK! I didnt get what you were trying to say."
         
         main_subject = subjects[len(subjects) - 1]
 
@@ -919,6 +919,10 @@ class Goose:
         #print ([x for x in text if (goose_pat.findall(x)) ])
         #print (is_goose_subject)
         #print( -1 * self.goose_emotion )
+        if (text[0] in self.greeting_words):
+            return self.greeting_handling(subjects, verbs)
+        if text[0] in self.QUESTION_WORDS or text[1] in self.QUESTION_WORDS:
+            return self.question_process(subjects, verbs, is_goose_subject)
         sentiment = self.extract_sentiment(line)
         if is_goose_subject and sentiment:
             if sentiment <= -1:
@@ -928,10 +932,7 @@ class Goose:
                 self.goose_emotion += 1
                 return "Your words have pleased me"
         # determine if what is being asked is a question
-        if (text[0] in self.greeting_words):
-            return self.greeting_handling(subjects, verbs)
-        if text[0] in self.QUESTION_WORDS or text[1] in self.QUESTION_WORDS:
-            return self.question_process(subjects, verbs, is_goose_subject)
+
 
         
         
