@@ -895,17 +895,22 @@ class Goose:
         # should be list(tuple(str, str))
         #print(line[0]) 
 
-        nouns = [x for x, y in line if "NN" or "PR" in y]
+        nouns = [x for (x, y) in line if "NN" in y or "PR" in y]
         verbs = [x for x, y in line if "V" in y]
+        #print(nouns)
+        #print ("THAT WAS JUST THE nouns")
         return nouns, verbs
 
     def noQuotedTitlesFoundDialogue(self, line):
         text = nltk.word_tokenize(line.lower())
         tagged_tokens = nltk.pos_tag(text)
         #print(tagged_tokens)
+
         subjects, verbs = self.get_subjects(tagged_tokens)
-        if (not subjects):
-            return "speak with good sentences man"
+        #print("subjects:" )
+        #print(subjects)
+        if (not subjects) or (len(tagged_tokens) <= 2 or len(verbs) == 0):
+            return "HONK! Please use complete sentences"
         
         main_subject = subjects[0]
 
