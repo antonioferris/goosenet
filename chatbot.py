@@ -168,7 +168,7 @@ class Chatbot:
     def update_multiple_preferences(self, title_sents):
         response = ''
         for title_id, sent in title_sents:
-            self.sentiment = sent
+            self.sentiment_rating = sent
             response += ' ' + self.update_with_preferences([title_id])
             if self.times >= 5:
                 break
@@ -230,7 +230,6 @@ class Chatbot:
                         all_specific = False
                         break
                 if all_specific: #multiple specific titles are present and work well
-                    print('Attempting multiple movies at once!')
                     title_sents = self.extract_sentiment_for_movies(line)
                     title_sents = [(self.find_movies_by_title(title)[0], sent) for title, sent in title_sents]
                     return self.update_multiple_preferences(title_sents)
@@ -252,7 +251,10 @@ class Chatbot:
                 self.params = {'title_list' : title_list, 'misspelled' : True}
                 self.curr_func = self.disambiguate_flow
                 return self.goose.disambiguationDialogue(True).format('\n'.join([self.title_text(i) for i in title_list]))
-        return self.update_with_preferences(title_list) + self.goose.sentimentFollowUp()
+        response = self.update_with_preferences(title_list)
+        if self.times < 5:
+            response += self.goose.sentimentFollowUp()
+        return response
 
     def process(self, line):
         """Process a line of input from the REPL and generate a response.
@@ -624,6 +626,7 @@ class Chatbot:
         :returns: a list of indices corresponding to the movies identified by the clarification
         """
         year_regex = re.compile('\(([0-9]{4})\)')
+        clarification = clarification.strip('.;:?!')
         def remains_valid(title):
             title_text = self.titles[title][0]
             movie_year = year_regex.findall(title_text)
