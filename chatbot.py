@@ -906,10 +906,10 @@ class Goose:
         subjects, verbs, pronouns = self.get_subjects(tagged_tokens)
         #print("subjects:" )
         #print(subjects)
-        if (not subjects) or (len(subjects) == len(text)):
+        if (not subjects) or (len(subjects) == len(text) or (subjects[0] == "i" and len(subjects) == 1 )):
             return "HONK! Please use complete sentences"
         
-        main_subject = subjects[1]
+        main_subject = subjects[len(subjects) - 1]
 
         
 
