@@ -137,7 +137,7 @@ class Chatbot:
         if not self.goose.isAffirmativeResponse(line):
             self.curr_func = self.post_recommend
             self.params = {}
-            response = "The Goosenet must move on to more important matters"
+            response = "The Goose is done with you! Unless you want to complement and please me " + ("HONK! " * (-1 * self.goose.goose_emotion)) + "get lost."
         else:
             if i >= 20:
                 self.curr_func = self.post_recommend
@@ -888,21 +888,22 @@ class Goose:
         # should be list(tuple(str, str))
         #print(line[0]) 
 
-        nouns = [x for (x, y) in line if "NN" in y or "PR" in y]
+        nouns = [x for (x, y) in line if "NN" in y]
         verbs = [x for x, y in line if "V" in y]
+        pronouns = [x for (x, y) in line if "PR" in y]
         #print(nouns)
         #print ("THAT WAS JUST THE nouns")
-        return nouns, verbs
+        return nouns, verbs, pronouns
 
     def noQuotedTitlesFoundDialogue(self, line):
         text = nltk.word_tokenize(line.lower())
         tagged_tokens = nltk.pos_tag(text)
         #print(tagged_tokens)
 
-        subjects, verbs = self.get_subjects(tagged_tokens)
+        subjects, verbs, pronouns = self.get_subjects(tagged_tokens)
         #print("subjects:" )
         #print(subjects)
-        if (not subjects) or (len(tagged_tokens) <= 2 or len(verbs) == 0):
+        if (not subjects) or (len(subjects) == len(text)):
             return "HONK! Please use complete sentences"
         
         main_subject = subjects[0]
@@ -930,23 +931,24 @@ class Goose:
 
         
         
-        return "HONK! I havent collected enough data yet to converse on this subject. You should talk about movies"
+        return "HONK! I havent collected enough data yet to converse on " + main_subject + ". You should talk about movies"
 
     def noTitlesIdentified(self):
         self.goose_emotion -= 1
         return "Stop trying to make up movies that dont exist! Becuase if I dont know it it doesnt exist!" + " Honk!" * -self.goose_emotion
 
     def execute_order_66(self):
-        self.last_chance = True
- 
+        
+        #print(" You better say something nice about me or else")
         if self.extract_sentiment(self.prev_line) >= 1 and self.goose_emotion > -4:
             self.last_chance = False
             return "You have appeased me. For now..."
         if self.last_chance:
             print("THATS IT HONK BYE!")
             exit()
+        self.last_chance = True
         
-        return "I AM AT THE LIMIT OF MY PATIENCE IF YOU DONT SAY SOMETHING NICE ABOUT ME I WILL LEAVE"
+        return "I AM AT THE LIMIT OF MY PATIENCE. IF YOU DONT SAY SOMETHING NICE ABOUT ME I WILL LEAVE"
 
     def goose_fav_movie(self, movie, sentiment):
         if sentiment > 0:
@@ -978,8 +980,8 @@ class Goose:
         # These are kinda magic and arbitrary number to cap anger/ happyness
         if self.goose_emotion > 10:
             self.goose_emotion = 10
-        elif self.goose_emotion < -4:
-            self.goose_emotion = -4
+        elif self.goose_emotion < self.anger_cap:
+            self.goose_emotion = self.anger_cap
 
         if emotion >  0:
             return random.choice(goose_response[1])
@@ -1111,8 +1113,11 @@ class Goose:
         return random.choice(unknown) #+ random.choice(self.goose_emotion_response[self.goose_emotion])
 
     def doneRecommendingDialogue(self):
-        return "The Goose is done with you!  Take the hint and " + ("HONK! " * (-1 * self.goose_emotion)) + "get lost."
-
+        self.goose_emotion -= 1
+        
+        if self.goose_emotion <= -4:
+            return self.execute_order_66()
+        return self.noQuotedTitlesFoundDialogue(self.prev_line)
 
 
 if __name__ == '__main__':
