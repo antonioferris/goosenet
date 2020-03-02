@@ -475,7 +475,7 @@ class Chatbot:
 
         for i in range(len(preprocessed_input)):
             word = preprocessed_input[i]
-            print(word, end='|')
+            
             if NEGATION_RE.search(word):
                 tag_neg = True
             elif PUNCT_RE.search(word) or word == "becaus":
@@ -902,7 +902,7 @@ class Goose:
     def noQuotedTitlesFoundDialogue(self, line):
         text = nltk.word_tokenize(line.lower())
         tagged_tokens = nltk.pos_tag(text)
-        print(tagged_tokens)
+        #print(tagged_tokens)
         subjects, verbs = self.get_subjects(tagged_tokens)
         if (not subjects):
             return "speak with good sentences man"
@@ -913,17 +913,17 @@ class Goose:
 
         goose_pat = re.compile('goose|goosenet|goose bot|bot|you|your')
         is_goose_subject = bool([x for x in text if (goose_pat.findall(x)) ])
-        print ([x for x in text if (goose_pat.findall(x)) ])
-        print (is_goose_subject)
-        print( -1 * self.goose_emotion )
+        #print ([x for x in text if (goose_pat.findall(x)) ])
+        #print (is_goose_subject)
+        #print( -1 * self.goose_emotion )
         sentiment = self.extract_sentiment(line)
         if is_goose_subject and sentiment:
             if sentiment <= -1:
                 self.goose_emotion -= 1 # the dialogue here needs work
-                return "Want to be mean to me? Buckle up ducko because HONK! I will be mad at you until you say something nice to me."
+                return "HONK!" * -self.goose_emotion + "You are making me angry...."
             else:
                 self.goose_emotion += 1
-                return "I am amazing, am I not? When I am finished taking over the world I might need to keep you as a pet"
+                return "Your words have pleased me"
         # determine if what is being asked is a question
         if (text[0] in self.greeting_words):
             return self.greeting_handling(subjects, verbs)
@@ -932,11 +932,11 @@ class Goose:
 
         
         
-        return "temp so doesnt crash"
+        return "HONK! I havent collected enough data yet to converse on this subject. You should talk about movies"
 
     def noTitlesIdentified(self):
-
-        return "HONK HONK TODO NO  TODO TODO TODO TODO TODO TODO TODO TODO TODO TITLES IDENTFIED"
+        self.goose_emotion -= 1
+        return "Stop trying to make up movies that dont exist! Becuase if I dont know it it doesnt exist!" + " Honk!" * -self.goose_emotion
 
     def execute_order_66(self):
         self.last_chance = True
