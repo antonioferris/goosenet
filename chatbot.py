@@ -461,30 +461,44 @@ class Chatbot:
         PUNCT = r"""[,.:;!?]"""
         PUNCT_RE = re.compile(PUNCT)
 
+        intense_words = {'love', 'hate', 'terribl', 'great', 'excel'}
+        INTENSIFIER = r"""^(?:re+ally|rea+lly|su+per)$"""
+        INTENSIFIER_RE = re.compile(INTENSIFIER)
+
         input_sentiment = 0
         tag_neg = False
 
         for i in range(len(preprocessed_input)):
-            if NEGATION_RE.search(preprocessed_input[i]):
+            word = preprocessed_input[i]
+            print(word, end='|')
+            if NEGATION_RE.search(word):
                 tag_neg = True
-            elif PUNCT_RE.search(preprocessed_input[i]) or preprocessed_input[i] == "becaus":
+            elif PUNCT_RE.search(word) or word == "becaus":
                 tag_neg = False
-
+            word = word.strip('.,;:!')
             delta = 0
-            word_sentiment = self.sentiment.get(preprocessed_input[i], '') # default to empty string
+            word_sentiment = self.sentiment.get(word, '') # default to empty string
             if word_sentiment == 'pos' or word_sentiment == 'po': #'po' is the stemmed version
                 delta = 1
             elif word_sentiment == 'neg':
                 delta = -1
             if tag_neg:
                 delta *= -1
+            if i > 0 and INTENSIFIER_RE.search(preprocessed_input[i-1]):
+                delta *= 2
+            elif word in intense_words:
+                delta *= 2
 
             input_sentiment += delta
 
         if input_sentiment == 0:
             return 0
+        elif input_sentiment < -1:
+            return -2
         elif input_sentiment < 0:
             return -1
+        elif input_sentiment > 1:
+            return 2
         else:
             return 1
 
@@ -1019,9 +1033,20 @@ class Goose:
 
     def recommendationApprovalDialogue(self, first_time):
         if first_time:
-            return " Would you like me to recomend you a movie?"
+            rec_approv_list_fir = [
+                " Would you like me to recomend you a movie?",
+                " The Goosenet would give you a recommendation if your puny mind is ready for it?",
+                " Want a great movie recommendation?"
+            ]
+            return return random.choice(rec_approv_list_fir)
         else:
-            return " Would you like me to recomend you another movie?"
+            rec_approv_list_sec = [
+                " Would you like me to recomend you another movie?",
+                " The Goosenet would give you another recommendation if your puny mind is ready for more?",
+                " Please take a break and go watch the movie.  Once you are done, type 'yes' to get another recommendation",
+                " Want another great movie recommendation?"
+            ]
+            return return random.choice(rec_approv_list_sec)
 
     def postRecommendationDialogue(self, used):
         if used:
@@ -1076,9 +1101,9 @@ class Goose:
         # To get more clairification about the movie that was already mentioned.
     def unknownSentiment(self):
         unknown = [
-        "HONK but how did you feel about {}?",
-        "I didnt catch how you felt about {}",
-        "HONK I need your emotions and feelings about {}"
+        "HONK but how did you feel about {}? Please compose a more informational sentence.",
+        "I didnt catch how you felt about {}.  You need to reiterate.",
+        "HONK I need your emotions and feelings about {}, not just random titles and words"
         ]
         return random.choice(unknown) #+ random.choice(self.goose_emotion_response[self.goose_emotion])
 
